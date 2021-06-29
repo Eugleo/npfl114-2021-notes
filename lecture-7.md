@@ -94,7 +94,9 @@ Oproti ResNetu mají navíc ještě C6 a C7, tj celkově dělají 7 max pooling�
 
 ![image-20210629151525773](/Users/eugen/Documents/deep-learning-notes/images/retina-net.png)
 
-Klasifikační hlava má na výstupu $K\cdot A$ kanálů, výstup bereme jako pnost, že anchor $A$ má třídu $K$. Bounding boxová hlava má $4 \cdot A$ kanálů, pro každý anchor určuje hodnotu čtyřech parametrů.
+Klasifikační hlava má na výstupu $K\cdot A$ kanálů. Kolem každého "pixelu" výstupu máme $A$ anchorů (většinou 9) a pro každý z nich potřebujeme říct pnost každé z $K$ tříd. Klasifikace je tedy plně obstarána těmito konvolucemi, žádný pooling už nenásleduje.
+
+Bounding boxová hlava má $4 \cdot A$ kanálů, pro každý anchor určuje hodnotu čtyřech parametrů.
 
 V rámci ResNetu jsou mezi C vrstvami prostě max poolingy, v FPN probíhá jednoduchý 2x upscaling (doslova stávající hodnota zkopíruje na ta nová místa) a featury zleva projdou 1x1 konvolucí, aby měly správný počet kanálů.
 

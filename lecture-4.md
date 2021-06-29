@@ -16,9 +16,9 @@ VALID bere v úvahu jen ty pozice, u kterých byl celý kernel "uvnitř" vstupn�
 
 > Describe batch normalization and write down an algorithm how it is used during training and an algorithm how it is used during inference. Be sure to explicitly write over what is being normalized in case of fully connected layers, and in case of convolutional layers. [10]
 
-Kdyý se během SGD změní distribuce hodnot vrstev vlevo, musíme jen kvůli této změny měnit i vrstvy napravo. Proto chceme všechny vrstvy nějakým způsobem normalizovat, tak, aby tyto změny byly co nejmenší.
+Když se během SGD změní distribuce hodnot vrstev vlevo, musíme jen kvůli této změny měnit i vrstvy napravo. Proto chceme všechny vrstvy nějakým způsobem normalizovat, tak, aby tyto změny byly co nejmenší.
 
-Během tréninku batchnorm pracuje následovně
+Během tréninku batchnorm pracuje následovně, vstupem jsou $x_i$ z jednoho batche.
 $$
 \begin{array}{l}
 \boldsymbol{\mu} \leftarrow \frac{1}{m} \sum_{i=1}^{m} \boldsymbol{x}^{(i)} \\
