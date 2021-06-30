@@ -77,8 +77,31 @@ Reálně to pak celé bude zlogaritmováno, tj. místo násobení bude $+$ a mí
 
 > Draw the CBOW architecture from `word2vec`, including the sizes of the inputs and the sizes of the outputs and used non-linearities. Also make sure to indicate where are the embeddings being trained. [5]
 
+Embedding je matice $W_{V\times N}$. Za output vrstvou je Softmax, který rozhoduje, které že slovo bylo v díře mezi těmi vstupními.
+
+<img src="/Users/eugen/Documents/deep-learning-notes/images/w2v-cbow.png" alt="img" style="zoom:67%;" />
+
 > Draw the SkipGram architecture from `word2vec`, including the sizes of the inputs and the sizes of the outputs and used non-linearities. Also make sure to indicate where are the embeddings being trained. [5]
+
+Aktivace je opět softmax, embeddingem je opět matice $W_{V\times N}$. Z jednoho slova predikujeme jeho kontext.
+
+<img src="/Users/eugen/Documents/deep-learning-notes/images/w2v-skip-gram.png" alt="img" style="zoom:50%;" />
 
 > Describe the hierarchical softmax used in `word2vec`. [5]
 
+Ze tříd (tj. ze slov) postavím binární strom, místo jedné klasifikace do $k$ tříd udělám $hloubka \in O(\log k)$ binárních klasifikací. Pokud pak slovo $w$ ve stromě odpovídá cestě $n_1, n_2, \ldots, n_L$, poté
+$$
+p_{\mathrm{HS}}\left(w \mid w_{i}\right) \stackrel{\mathrm{def}}{=} \prod_{j=1}^{L-1} \sigma\left(\left[+1 \text { if } n_{j+1} \text { is right child else }-1\right] \cdot \boldsymbol{W}_{n_{j}}^{\top} \boldsymbol{V}_{w_{i}}\right)
+$$
+Tohle má sice špatnou accuracy, ale nám to nevadí, protože embeddingy vzniknou hezké.
+
 > Describe the negative sampling proposed in `word2vec`, including the choice of distribution of negative samples. [5]
+
+1. Místo velkého softmaxu udělám nad každým slovem sigmoid; hodnoty nebudou 100% správně (nenasčítá se to do jedničky), ale derivace budou zhruba fungovat.
+2. Místo, abych tlačil dolů pravděpodobnosti _všech_ negativních příkladů, nasampluji náhodně $k$ z nich — jinak by mi negativní příklady úplně udusily ten jeden pozitivní.
+
+$$
+l_{\mathrm{NEG}}\left(w_{o}, w_{i}\right) \stackrel{\text { def }}{=} \log \sigma\left(\boldsymbol{W}_{w_{o}}^{\top} \boldsymbol{V}_{w_{i}}\right)+\sum_{j=1}^{k} \mathbb{E}_{w_{j} \sim P(w)} \log \left(1-\sigma\left(\boldsymbol{W}_{w_{j}}^{\top} \boldsymbol{V}_{w_{i}}\right)\right)
+$$
+
+Slova samplujeme z unigramového rozdělení $U(w)^{3/4}$, což je rozdělení slov, kterém jim přiděluje pravděpodobnost podle počtu jejich výskytů v korpusu.
