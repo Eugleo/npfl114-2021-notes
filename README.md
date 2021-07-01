@@ -6,3 +6,8 @@ View the generated files in the `rendered-*` directories.
 
 1. Edit `.md` files
 2. Render them by using `./render.sh`
+
+## Links
+
+- [NPFL114 2021 home page](https://ufal.mff.cuni.cz/courses/npfl114/2021-summer#home)
+- CSS theme is [View.css for Typora](https://github.com/blinkfox/typora-vue-theme?files=1)
