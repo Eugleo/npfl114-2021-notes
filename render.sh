@@ -3,7 +3,7 @@
 mkdir -p "rendered-pdf"
 mkdir -p "rendered-html"
 
-CSS_PATH="/Users/eugen/Library/Application Support/abnerworks.Typora/themes/vue.css"
+CSS_PATH="styles/vue.css"
 
 for f in lecture-*.md; do
   html_filename="./rendered-html/${f%.*}.html"
