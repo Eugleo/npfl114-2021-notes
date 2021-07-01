@@ -10,6 +10,10 @@ img {
     display: block;
 }
 
+img.math.inline {
+    display: inline;
+}
+
 /* cyrillic-ext */
 @font-face {
     font-family: 'Roboto Mono';

@@ -13,7 +13,8 @@ for f in lecture-*.md; do
 
   pdf_filename="./rendered-pdf/${f%.*}.pdf"
   echo "Converting $f to $pdf_filename.pdf"
-  pandoc --katex --css "$CSS_PATH" -f markdown -t html5 -o "$pdf_filename" -- "$f"
+  pandoc --mathjax --css "$CSS_PATH" --pdf-engine lualatex -o "$pdf_filename" -- "$f"
 
   sed -i "" "s|images/|../images/|g" "$html_filename"
+  sed -i "" "s|styles/|../styles/|g" "$html_filename"
 done
