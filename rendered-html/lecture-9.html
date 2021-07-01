@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lecture-9</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <link rel="stylesheet" href="/Users/eugen/Library/Application Support/abnerworks.Typora/themes/vue.css" />
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="lekce-9-60">Lekce 9 [60]</h1>
+<blockquote>
+<p>Considering a linear-chain CRF, write down how a score of a label sequence <span class="math inline">\(y\)</span> is defined, and how can a log probability be computed using the label sequence scores. [5]</p>
+</blockquote>
+<p>Linear-chain CRF je lineární graf, ve kterém hrany definují závislosti mezi prvky výstupní sekvence.</p>
+<p><img src="../images/crf.png" alt="image-20210629205015731" style="zoom:50%;" /></p>
+<p>Skóre nějaké výstupní sekvence <span class="math inline">\(y\)</span> v závislosti na vstupu <span class="math inline">\(X\)</span> se počítá jako součet pravděpodobnosti jednotlivých labelů <span class="math inline">\(f(y_i | X)\)</span> a přechodů mezi nimi <span class="math inline">\(A_{y_{i-1} y_i}\)</span>. <span class="math display">\[
+s(\boldsymbol{X}, \boldsymbol{y} ; \boldsymbol{\theta}, \boldsymbol{A})=\sum_{i=1}^{N}\left(\boldsymbol{A}_{y_{i-1}, y_{i}}+f_{\boldsymbol{\theta}}\left(y_{i} \mid \boldsymbol{X}\right)\right)
+\]</span> Jakmile spočteme skóre, můžeme vypočítat pravděpodobnost celé “věty” <span class="math inline">\(y\)</span> pomocí softmaxu. Cross entropii této vzniklé distribuce poté spočítáme zlogaritmováním této pravděpodobnosti: <span class="math display">\[
+\log p(\boldsymbol{y} \mid \boldsymbol{X})=s(\boldsymbol{X}, \boldsymbol{y})-\operatorname{logsumexp}_{\boldsymbol{z} \in Y^{N}}(s(\boldsymbol{X}, \boldsymbol{z}))
+\]</span></p>
+<blockquote>
+<p>Write down the dynamic programming algorithm for computing log probability of a linear-chain CRF, including its asymptotic complexity. [10]</p>
+</blockquote>
+<p>Když do sebe zanořuji logsumexpy, logy a expy se vyruší, takže z toho nakonec vznikne jeden velký logsumexp se sumami uvniř. Proto je také <span class="math display">\[
+\operatorname{logsumexp}_{k=1}^{Y}\left(\alpha_{N}(k)\right) = \operatorname{logsumexp}_{z \in Y^N}(s(z)),
+\]</span> kde <span class="math inline">\(\alpha_t(k)\)</span> označuje log-pravděpodobnost sekvence dlouhé <span class="math inline">\(t\)</span> a končící na $k <span class="math display">\[
+\alpha_{t}(k)=f_{\boldsymbol{\theta}}\left(y_{t}=k \mid \boldsymbol{X}\right)+\operatorname{logsumexp}_{j \in Y}\left(\alpha_{t-1}(j)+\boldsymbol{A}_{j, k}\right)
+\]</span> <img src="/Users/eugen/Library/Application%20Support/typora-user-../images/image-20210629213211629.png" alt="image-20210629213211629" /></p>
+<blockquote>
+<p>Write down the dynamic programming algorithm for linear-chain CRF decoding, i.e., an algorithm computing the most probable label sequence <span class="math inline">\(y\)</span>. [10]</p>
+</blockquote>
+<p>Algoritmus je stejný jako výše, pouze místo logsumexpů se použije max. Také musíme sledovat, <em>kde</em> bylo maxima dosaženo.</p>
+<figure>
+<img src="../images/crf-decoding.png" alt="image-20210629215723224" /><figcaption aria-hidden="true">image-20210629215723224</figcaption>
+</figure>
+<blockquote>
+<p>In the context of CTC loss, describe regular and extended labelings and write down an algorithm for computing the log probability of a gold label sequence <span class="math inline">\(y\)</span>. [10]</p>
+</blockquote>
+<p>Regular labeling je labeling s délkou <span class="math inline">\(\leq\)</span> délka vstupní sekvence. Síť ale generuje extended labeling, který má stejnou délku, a obsahuje speciální znak <span class="math inline">\(blank\)</span>. Regulární labeling můžeme vyrobit z extended tím, že spojíme shodné sousední znaky a poté vymažeme blanky.</p>
+<p>Pro nějakou sekvenci <span class="math inline">\(y\)</span> definujeme <span class="math inline">\(\alpha^t(s)\)</span> jako pravděpodobnost, že prvních <span class="math inline">\(t\)</span> kroků sítě vygenerovalo prvních <span class="math inline">\(s\)</span> znaků sekvence <span class="math inline">\(y\)</span>, <span class="math display">\[
+\alpha^{t}(s) \stackrel{\text { def }}{=} \sum_{\begin{array}{c}
+\text { extended } \\
+\text { labelings } \boldsymbol{\pi}: \\
+\mathcal{B}\left(\boldsymbol{\pi}_{1: t}\right)=\boldsymbol{y}_{1: s}
+\end{array}} \prod_{t^{\prime}=1}^{t} p_{\boldsymbol{\pi}_{t^{\prime}}}^{t^{\prime}}
+\]</span> Toto <span class="math inline">\(\alpha^t(s)\)</span> se dá vypočítat jako součet <span class="math inline">\(\alpha^t_-(s)\)</span>, které označuje, že vygenerovaná sekvence <span class="math inline">\(\pi\)</span> končí na blank, a <span class="math inline">\(\alpha^t_*(s)\)</span>, která označuje, že <span class="math inline">\(\pi\)</span> na blank nekončí. Inicializujeme <span class="math display">\[
+\begin{array}{l}
+\alpha_{-}^{1}(0) \leftarrow p_{-}^{1} \\
+\alpha_{*}^{1}(1) \leftarrow p_{y_{1}}^{1}
+\end{array}
+\]</span> a provedeme indukční krok <span class="math display">\[
+\begin{array}{l}
+\alpha_{-}^{t}(s) \leftarrow p_{-}^{t}\left(\alpha_{*}^{t-1}(s)+\alpha_{-}^{t-1}(s)\right) \\
+\alpha_{*}^{t}(s) \leftarrow\left\{\begin{array}{l}
+p_{y_{s}}^{t}\left(\alpha_{*}^{t-1}(s)+\alpha_{-}^{t-1}(s-1)+\alpha_{*}^{t-1}(s-1)\right), \text { if } y_{s} \neq y_{s-1} \\
+p_{y_{s}}^{t}\left(\alpha_{*}^{t-1}(s)+\alpha_{-}^{t-1}(s-1)\right), \text { if } y_{s}=y_{s-1}
+\end{array}\right.
+\end{array}
+\]</span> V druhém případě je nutné uvažovat, zda v mé extended <span class="math inline">\(\pi\)</span> je znak <span class="math inline">\(\pi_s\)</span> stejný jako <span class="math inline">\(\pi_{s-1}\)</span> — pokud ano, tak <span class="math inline">\(\alpha^{t-1}\)</span> musí vygenerovat celých <span class="math inline">\(s\)</span> znaků, jinak by mu stačilo vygenerovat <span class="math inline">\(s-1\)</span>, protože ten <span class="math inline">\(s\)</span>-tý jsem vygeneroval teď v čase <span class="math inline">\(t\)</span>.</p>
+<p>Reálně to pak celé bude zlogaritmováno, tj. místo násobení bude <span class="math inline">\(+\)</span> a místo <span class="math inline">\(+\)</span> budou logsumexpy.</p>
+<blockquote>
+<p>Describe how are CTC predictions performed using a beam-search. [5]</p>
+</blockquote>
+<p>Obecně si v kroce <span class="math inline">\(t\)</span> si nechám <span class="math inline">\(k\)</span> nejlepších regulárních labelingů, které umím vygenerovat v <span class="math inline">\(t\)</span> krocích (tj. z extended labelingu délky <span class="math inline">\(t\)</span>). Uloženy mám i jejich <span class="math inline">\(\alpha^t(y)\)</span>, tj. součet jejich pravděpodobností napříč extended labelingy.</p>
+<ol type="1">
+<li>Vygeneruji nové extended labelingy tak, že ka každý ze svých regulárních přidám buďto blank, nebo jiný label.</li>
+<li>Všechny předělám na regulární labelingy</li>
+<li>Stejné labeling seskupím a sečtu jejich pravděpodobnosti</li>
+<li>Z této množiny prodloužených regulárních labelingů vyberu <span class="math inline">\(k\)</span> nejlepších a iteruji.</li>
+</ol>
+<blockquote>
+<p>Draw the CBOW architecture from <code>word2vec</code>, including the sizes of the inputs and the sizes of the outputs and used non-linearities. Also make sure to indicate where are the embeddings being trained. [5]</p>
+</blockquote>
+<p>Embedding je matice <span class="math inline">\(W_{V\times N}\)</span>. Za output vrstvou je Softmax, který rozhoduje, které že slovo bylo v díře mezi těmi vstupními.</p>
+<p><img src="../images/w2v-cbow.png" alt="img" style="zoom:67%;" /></p>
+<blockquote>
+<p>Draw the SkipGram architecture from <code>word2vec</code>, including the sizes of the inputs and the sizes of the outputs and used non-linearities. Also make sure to indicate where are the embeddings being trained. [5]</p>
+</blockquote>
+<p>Aktivace je opět softmax, embeddingem je opět matice <span class="math inline">\(W_{V\times N}\)</span>. Z jednoho slova predikujeme jeho kontext.</p>
+<p><img src="../images/w2v-skip-gram.png" alt="img" style="zoom:50%;" /></p>
+<blockquote>
+<p>Describe the hierarchical softmax used in <code>word2vec</code>. [5]</p>
+</blockquote>
+<p>Ze tříd (tj. ze slov) postavím binární strom, místo jedné klasifikace do <span class="math inline">\(k\)</span> tříd udělám <span class="math inline">\(hloubka \in O(\log k)\)</span> binárních klasifikací. Pokud pak slovo <span class="math inline">\(w\)</span> ve stromě odpovídá cestě <span class="math inline">\(n_1, n_2, \ldots, n_L\)</span>, poté <span class="math display">\[
+p_{\mathrm{HS}}\left(w \mid w_{i}\right) \stackrel{\mathrm{def}}{=} \prod_{j=1}^{L-1} \sigma\left(\left[+1 \text { if } n_{j+1} \text { is right child else }-1\right] \cdot \boldsymbol{W}_{n_{j}}^{\top} \boldsymbol{V}_{w_{i}}\right)
+\]</span> Tohle má sice špatnou accuracy, ale nám to nevadí, protože embeddingy vzniknou hezké.</p>
+<blockquote>
+<p>Describe the negative sampling proposed in <code>word2vec</code>, including the choice of distribution of negative samples. [5]</p>
+</blockquote>
+<ol type="1">
+<li>Místo velkého softmaxu udělám nad každým slovem sigmoid; hodnoty nebudou 100% správně (nenasčítá se to do jedničky), ale derivace budou zhruba fungovat.</li>
+<li>Místo, abych tlačil dolů pravděpodobnosti <em>všech</em> negativních příkladů, nasampluji náhodně <span class="math inline">\(k\)</span> z nich — jinak by mi negativní příklady úplně udusily ten jeden pozitivní.</li>
+</ol>
+<p><span class="math display">\[
+l_{\mathrm{NEG}}\left(w_{o}, w_{i}\right) \stackrel{\text { def }}{=} \log \sigma\left(\boldsymbol{W}_{w_{o}}^{\top} \boldsymbol{V}_{w_{i}}\right)+\sum_{j=1}^{k} \mathbb{E}_{w_{j} \sim P(w)} \log \left(1-\sigma\left(\boldsymbol{W}_{w_{j}}^{\top} \boldsymbol{V}_{w_{i}}\right)\right)
+\]</span></p>
+<p>Slova samplujeme z unigramového rozdělení <span class="math inline">\(U(w)^{3/4}\)</span>, což je rozdělení slov, kterém jim přiděluje pravděpodobnost podle počtu jejich výskytů v korpusu.</p>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lecture-1</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <link rel="stylesheet" href="/Users/eugen/Library/Application Support/abnerworks.Typora/themes/vue.css" />
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="lekce-1">Lekce 1</h1>
+<blockquote>
+<p>Considering a neural network with <span class="math inline">\(D\)</span> input neurons, a single hidden layer with <span class="math inline">\(H\)</span> neurons, <span class="math inline">\(K\)</span> output neurons, hidden activation <span class="math inline">\(f\)</span> and output activation <span class="math inline">\(a\)</span>, list its parameters (including their size) and write down how is the output computed. [5]</p>
+</blockquote>
+<p>Parametry</p>
+<ul>
+<li>Matice <span class="math inline">\(W \in \mathbb{R}^{D \times H}\)</span> a <span class="math inline">\(V \in \mathbb{R}^{H \times K}\)</span></li>
+<li>Biasy <span class="math inline">\(b\)</span> a <span class="math inline">\(p\)</span></li>
+</ul>
+<p>Výpočet</p>
+<ul>
+<li>Výstup vnitřní vrstvy <span class="math inline">\(h = f(Wx + b)\)</span></li>
+<li>Finální výstup <span class="math inline">\(o = a(Vh + p)\)</span></li>
+</ul>
+<blockquote>
+<p>List the definitions of frequently used MLP output layer activations (the ones producing parameters of a Bernoulli distribution and a categorical distribution). Then write down three commonly used hidden layer activations (sigmoid, tanh, ReLU). [5]</p>
+</blockquote>
+<p>Výstupní vrstvy</p>
+<ul>
+<li><span class="math inline">\(\sigma(x) = 1/(1 + e ^ {-x})\)</span> pro binární klasifikaci</li>
+<li><span class="math inline">\(softmax(x)_i = e^{x_i}/\sum_j e^{x_j}\)</span>, rozšíření sigmoidu na více tříd</li>
+</ul>
+<p>Vnitřní vrstvy</p>
+<ul>
+<li><span class="math inline">\(\sigma(x) = 1/(1 + e ^ {-x})\)</span>, není ideální</li>
+<li><span class="math inline">\(tanh(x) = 2\sigma(2x) - 1\)</span>, sigmoid upravený tak, aby byl symetrický (tj. aby jeho opakování nekonvergovalo k 1) a aby jeho derivace v 0 byla 1</li>
+<li><span class="math inline">\(ReLU(x) = max(0, x)\)</span>, jednoduchá nelinearita</li>
+</ul>
+<blockquote>
+<p>Formulate the Universal approximation theorem. [5]</p>
+</blockquote>
+<p>Nechť <span class="math inline">\(\varphi(x)\)</span> je nekonstatní, omezená, neklesající spojitá funkce (později dokonce jakákoli nepolynomiální). Poté <span class="math inline">\(\forall \varepsilon &gt; 0\)</span> a <span class="math inline">\(\forall f\)</span> spojité na <span class="math inline">\([0,1]^D\)</span> existuje <span class="math inline">\(N \in \mathbb{N}, v \in \mathbb{R}^N\)</span>, <span class="math inline">\(b \in \mathbb{R}^N\)</span>, <span class="math inline">\(W \in \mathbb{R}^{N \times D}\)</span> takové, že pokud máme <span class="math inline">\(F(x)\)</span> jako <span class="math display">\[
+F(x) = v^T \varphi(Wx + b),
+\]</span> tak pro všechny <span class="math inline">\(x \in [0, 1]^D\)</span> platí <span class="math display">\[
+|F(x) - f(x)| &lt; \varepsilon.
+\]</span> Jinými slovy, pokud máme vhodnou aktivační funkci, umíme pomocí ní a pomocí vhodné lineární transformace <span class="math inline">\(W\)</span> libobolně dobře aproximovat jakoukoli spojitou funkci.</p>
+</body>
+</html>

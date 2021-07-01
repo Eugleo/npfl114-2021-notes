@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lecture-4</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <link rel="stylesheet" href="/Users/eugen/Library/Application Support/abnerworks.Typora/themes/vue.css" />
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="lekce-4">Lekce 4</h1>
+<blockquote>
+<p>Write down the equation of how convolution of a given image is computed. Assume the input is an image <span class="math inline">\(I\)</span> of size <span class="math inline">\(H \times W\)</span> with <span class="math inline">\(C\)</span> channels, the kernel <span class="math inline">\(K\)</span> has size <span class="math inline">\(N \times M\)</span>, the stride is <span class="math inline">\(T \times S\)</span>, the operation performed is in fact cross-correlation (as usual in convolutional neural networks) and that <span class="math inline">\(O\)</span> output channels are computed. [5]</p>
+</blockquote>
+<p><span class="math display">\[
+(\mathrm{K} \star \mathrm{I})_{i, j, o}=\sum_{m, n, c} I_{i \cdot S+m, j \cdot T+n, c} \mathrm{~K}_{m, n, c, o}
+\]</span></p>
+<p>V zásadě je pixel na pozici <span class="math inline">\(i, j, o\)</span> vytvořen posouváním <span class="math inline">\(o\)</span>-tého kernelu kolem pozice <span class="math inline">\(i\cdot S, j \cdot T\)</span> v <span class="math inline">\(I\)</span>.</p>
+<blockquote>
+<p>Explain both <code>SAME</code> and <code>VALID</code> padding schemes and write down the output size of a convolutional operation with an <span class="math inline">\(N \times M\)</span> kernel on image of size f <span class="math inline">\(H \times W\)</span> or both these padding schemes (stride is 1). [5]</p>
+</blockquote>
+<p>SAME zachová původní rozměry, krajní hodnoty tím pádem nejsou kombinovány z plného kernelu, ale jen z jeho validní části. Je implementovaný tak, že se původní obrázek dopaduje nulami, a pak se spustí VALID.</p>
+<p>VALID bere v úvahu jen ty pozice, u kterých byl celý kernel “uvnitř” vstupního obrázku. Výsledné rozměry jsou tedy kratší o šířku (výšku) kernelu.</p>
+<blockquote>
+<p>Describe batch normalization and write down an algorithm how it is used during training and an algorithm how it is used during inference. Be sure to explicitly write over what is being normalized in case of fully connected layers, and in case of convolutional layers. [10]</p>
+</blockquote>
+<p>Když se během SGD změní distribuce hodnot vrstev vlevo, musíme jen kvůli této změny měnit i vrstvy napravo. Proto chceme všechny vrstvy nějakým způsobem normalizovat, tak, aby tyto změny byly co nejmenší.</p>
+<p>Během tréninku batchnorm pracuje následovně, vstupem jsou <span class="math inline">\(x_i\)</span> z jednoho batche. <span class="math display">\[
+\begin{array}{l}
+\boldsymbol{\mu} \leftarrow \frac{1}{m} \sum_{i=1}^{m} \boldsymbol{x}^{(i)} \\
+\boldsymbol{\sigma}^{2} \leftarrow \frac{1}{m} \sum_{i=1}^{m}\left(\boldsymbol{x}^{(i)}-\mu\right)^{2} \\
+\hat{\boldsymbol{x}}^{(i)} \leftarrow\left(\boldsymbol{x}^{(i)}-\boldsymbol{\mu}\right) / \sqrt{\boldsymbol{\sigma}^{2}+\varepsilon} \\
+\boldsymbol{y}^{(i)} \leftarrow \boldsymbol{\gamma} \hat{\boldsymbol{x}}^{(i)}+\boldsymbol{\beta}
+\end{array}
+\]</span> Tj. spočítáme střední hodnotu a rozptyl batche, ručně znormalizujeme vstupy, a pak dovolíme síti pomocí naučených parametrů <span class="math inline">\(\gamma\)</span> a <span class="math inline">\(\beta\)</span> přeškálovat a posunout standardní rozdělení na libovolnou střední hodnotu a rozptyl.</p>
+<p>Během inference už nepřepočítáváme <span class="math inline">\(\mu\)</span> a <span class="math inline">\(\sigma^2\)</span>, ale používáme hodnoty získané při tréninku. Aktivační funkci používáme <em>po</em> batchnormu, biasy přeskakujeme. <span class="math display">\[
+f(B N(\boldsymbol{W} \boldsymbol{x}))
+\]</span> Když je batchnorm použitý na dense vrstvách, každý neuron je normalizován sám za sebe (v rámci batche). V CNN normalizování probíhá v rámci celého kanálu (tak, jak bychom čekali).</p>
+<blockquote>
+<p>Describe overall architecture of VGG-19 (you do not need to remember the exact number of layers/filters, but you should describe which layers are used). [5]</p>
+</blockquote>
+<ol type="1">
+<li><p>2 x conv3 64</p></li>
+<li><p>maxpool</p></li>
+<li><p>2 x conv3 128</p></li>
+<li><p>maxpool</p></li>
+<li><p>4 x conv3 256</p></li>
+<li><p>maxpool</p></li>
+<li><p>4 x conv3 512</p></li>
+<li><p>maxpool</p></li>
+<li><p>4 x conv3 512</p></li>
+<li><p>maxpool</p></li>
+<li><p>3 x fully connected</p></li>
+<li><p>softmax</p></li>
+</ol>
+<p>Nepoužívají se 5x5 konvoluce, protože dvě 3x3 za sebou mají zhruba stejné receptive field, ale mají méně parametrů a jsou rychlejší. Vždy po max poolingu zdvojnásobíme počet kanálů (než nám dojde paměť v posledním bloku, that is).</p>
+<p>Kvůli finálním FC vrstvám museli používat obrázky fixní velikosti; samotné konvuluce by si s různě velkými obrázky poradit zvládly.</p>
+</body>
+</html>

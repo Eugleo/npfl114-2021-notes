@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lecture-5</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <link rel="stylesheet" href="/Users/eugen/Library/Application Support/abnerworks.Typora/themes/vue.css" />
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="lekce-5">Lekce 5</h1>
+<blockquote>
+<p>Describe overall architecture of ResNet. You do not need to remember the exact number of layers/filters, but you should draw a bottleneck block (including the applications of BatchNorms and ReLUs) and state how residual connections work when the number of channels increases. [10]</p>
+</blockquote>
+<p>Základní blok vypadá následovně, <em>weight</em> jsou 3x3 konvoluce.</p>
+<figure>
+<img src="../images/image-20210628103451208.png" alt="image-20210628103451208" /><figcaption aria-hidden="true">image-20210628103451208</figcaption>
+</figure>
+<p>V bottleneck bloku jsou konvoluce tři, dvě z nich 1x1. Ušetří to parametry, takže síť může být hlubší. Vlastně v něm určujeme podbnožinu vstupních kanálů, kterým dovolíme spolu přes konvoluci interagovat.</p>
+<p><img src="../images/image-20210628101122998.png" /></p>
+<p>Celá síť má několik takovýchto bottleneck bloků za sebou, se zvyšujícím se počtem kanálů uprostřed.</p>
+<figure>
+<img src="../images/image-20210628104841061.png" alt="image-20210628104841061" /><figcaption aria-hidden="true">image-20210628104841061</figcaption>
+</figure>
+<p>Mezi vrstvami convN_x se místo max poolingu dělá konvoluce se stridem 2, čímž se zamezí ztrátě informace.</p>
+<p>Reziduální spojení nemohou být přímo aplikovány mezi jednotlivými convN_x vrstvami, protože mají různý počet kanálů. Používá se proto 1x1 konvoluce s BN <em>(a nejspíše bez aktivace)</em>.</p>
+<blockquote>
+<p>Draw the original ResNet block (including the exact positions of BatchNorms and ReLUs) and also the improved variant with full pre-activation. [5]</p>
+</blockquote>
+<p>Originální blok vypadá následovně.</p>
+<figure>
+<img src="../images/image-20210628103451208.png" alt="image-20210628103451208" /><figcaption aria-hidden="true">image-20210628103451208</figcaption>
+</figure>
+<p>Zatímco full pre-activatin blok má ReLU uvnitř, a navíc je i s BN <em>před</em> samotnými konvolucemi.</p>
+<figure>
+<img src="../images/full-pre-activation-block.png" alt="image-20210628105416125" /><figcaption aria-hidden="true">image-20210628105416125</figcaption>
+</figure>
+<p>To funguje (z části i) proto, že při součtu výsledku s resiudální hranou se nám může rozbít ditribuce, takže je fajn i hned prohnat batch normem.</p>
+<blockquote>
+<p>Compare the bottleneck block of ResNet and ResNeXt architectures (draw the latter using convolutions only, i.e., do not use grouped convolutions). [5]</p>
+</blockquote>
+<p>V ResNeXt rozdělíme blok na několik podbloků s menším počtem vnitřních kanálů. Původně by například každý ze 64 výstupních kanálů mohl být ovlivněn jakýmkoli ze vstupních 64 kanálů, v ResNeXt tyto interakce omezíme — jeden kanál bude ovlivňován třeba čtyřmi jinými. (vlevo ResNet, vpravo ResNeXt)</p>
+<figure>
+<img src="../images/resnext.png" alt="image-20210628111053477" /><figcaption aria-hidden="true">image-20210628111053477</figcaption>
+</figure>
+<p>S tím, že horní i spodní konvoluce můžeme sloučit do jedné.</p>
+<figure>
+<img src="../images/image-20210628111412449.png" alt="image-20210628111412449" /><figcaption aria-hidden="true">image-20210628111412449</figcaption>
+</figure>
+<blockquote>
+<p>Describe the CNN regularization method of networks with stochastic depth. [5]</p>
+</blockquote>
+<p>Náhodně s pravděpodobností <span class="math inline">\(1 - p_i\)</span> dropneme celý <span class="math inline">\(i\)</span>-tý blok (kromě jeho residualního spojení, ofc). Během inference výstup bloku <span class="math inline">\(B_i\)</span> vynásobíme <span class="math inline">\(p_i\)</span>.</p>
+<p>Pravděpodobnost toho, že blok zůstane, tj. <span class="math inline">\(p_i\)</span>, nastavíme tak, aby klesala lineárně ke konci sítě (první vrstvy jsou důležitější, nechceme je dropovat tak často). <span class="math display">\[
+p_i = 1 - \frac{i}{L} (1 - p_L)
+\]</span></p>
+<blockquote>
+<p>Compare Cutout and DropBlock. [5]</p>
+</blockquote>
+<p>Cutout nahradí náhodný souvislý čtvercový kus obrázku ve všech kanálech průměrnou hodnotou. DropBlock dropuje obdélníkové oblasti nezávisle v každém kanálu.</p>
+<p>Takže rozdíl je jednak v přístupu ke kanálům, a také v tom, že cutout hodnoty nahrazuje fake hodnotou, zatímco DropBlock je prostě zahodí. Cutout se (tím pádem?) používá jen na vstupních obrázcích, zatímco DropBlock kdykoli uvnitř sítě.</p>
+<p>Obojí je lepší než běžný dropout, protože v obrázcích je lepší zahazovat sousední pozice, abychom opravdu tu informaci odstranili.</p>
+<blockquote>
+<p>Describe Squeeze and Excitation applied to a ResNet block. [5]</p>
+</blockquote>
+<p>SE chce obecně dovolit kanálům nějakým způsobem globálně interagovat, a z těchto interakcí vykoukal, jak je který kanál důležitý a podle toho je naškálovat.</p>
+<ul>
+<li>Squeeze spočítá průměr každého kanálu (global pooling)</li>
+<li>Dvě složené FC vrstvy se postarají o transformaci <span class="math inline">\(C \to C\)</span>, tj</li>
+<li>Excitation přiřkne každému kanálu váhu 0–1</li>
+<li>Scale každý kanál v původním výsledku vynásobí vahou z excitation</li>
+</ul>
+<p>Místo jedné CxC FC vrstvy máme dvě, první redukující na C/r a druhou naopak nafukující zpět na C. Oproti běžnému <span class="math inline">\(C\to C\)</span> tímto ušetříme parametry. (Podobná myšlenka jako u ResNet bottleneck bloků)</p>
+<p><img src="../images/squeeze-and-excitation.png" alt="image-20210628115555438" style="zoom:50%;" /></p>
+<blockquote>
+<p>Draw the Mobile inverted bottleneck block (including explanation of separable convolutions, the expansion factor, exact positions of BatchNorms and ReLUs, but without describing Squeeze and excitation bocks). [5]</p>
+</blockquote>
+<p>Separable konvoluce nematchuje každý vstupní kanál ke každému z výstupních, ale matchuje je jedna ku jedná. Tj výstupních musí být stejně jako vstupních, a celá operace je mnohem ryhlejší.</p>
+<p>MIB bloky se chovají trochu jako bloky WideNetu, dostanou <span class="math inline">\(F\)</span> kanálů, rozšíří je pomocí 1x1 konvoluce, poté udělají 3x3 konvoluci (separovanou, aby byla rychlejší), jejíž výstupem je tedy opět stejné rozšířené množství kanálů, a ty pak transformují zpět opět 1x1 konvolucí. Tato poslední konvoluce je bez aktivační funkce, protože ReLU zahazuje informace, což zrovna v tomto zúženém místě nechceme.</p>
+<figure>
+<img src="../images/mobile-inverted-block.png" alt="image-20210629105003774" /><figcaption aria-hidden="true">image-20210629105003774</figcaption>
+</figure>
+<blockquote>
+<p>Assume an input image <span class="math inline">\(I\)</span> of size <span class="math inline">\(H \times W\)</span> with <span class="math inline">\(C\)</span> channels, and a convolutional kernel <span class="math inline">\(K\)</span> with size $NM $ stride <span class="math inline">\(S\)</span> and <span class="math inline">\(O\)</span> output channels. Write down (or derive) the equation of transposed convolution (or equivalently backpropagation through a convolution to its inputs). [5]</p>
+</blockquote>
+<p><span class="math display">\[
+\frac{\partial L}{\partial I_{i, j, c}}=\sum_{m, i&#39;} \sum_{n, j&#39;} \sum_{o}
+\frac{\partial L}{\partial(\mathrm{K} \star I)_{i&#39;, j&#39;, o}}
+\frac{\partial(\mathrm{K} \star I)_{i&#39;, j&#39;, o}}{\partial I_{i,j,c}}
+\]</span></p>
+<p>Tento obecný vzorec vyplývá z chain rule, jde ale zjednodušit, protože některé ze sčítanců budou nulové. Některé cross-korelace <span class="math inline">\((\mathrm{K} \star I)_{i, j, o}\)</span> totiž na některých pixelech <span class="math inline">\(I_{i,j,c}\)</span> vůbec nezávisí (tj. derivace je nula).</p>
+<p>Když vhodně omezíme <span class="math inline">\(i&#39;, j&#39;\)</span> tak, aby seděly do stridu a my se zbavili nulových sčítanců, dá se vzorec napsat jako <span class="math display">\[
+\frac{\partial L}{\partial I_{i, j, c}}=\sum_{m \atop{i^{\prime} \space : \space i = i&#39;\cdot S + m}} \sum_{n \atop{j^{\prime} \space : \space j = j&#39; \cdot S + n}} \sum_{o}
+\frac{\partial L}{\partial(\mathrm{K} \star I)_{i&#39;, j&#39;, o}}
+K_{m,n,c,o}
+\]</span></p>
+</body>
+</html>

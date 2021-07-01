@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lecture-8</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <link rel="stylesheet" href="/Users/eugen/Library/Application Support/abnerworks.Typora/themes/vue.css" />
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="lekce-8">Lekce 8</h1>
+<blockquote>
+<p>Write down how the Long Short-Term Memory (LSTM) cell operates, including the explicit formulas. Also mention the forget gate bias. [10]</p>
+</blockquote>
+<figure>
+<img src="/Users/eugen/Library/Application%20Support/typora-user-../images/image-20210629172829016.png" alt="image-20210629172829016" /><figcaption aria-hidden="true">image-20210629172829016</figcaption>
+</figure>
+<p>LSTM je vlastně Simple RNN buňka (tj <span class="math inline">\(\tanh\)</span> aktivovaná lineární kombinace vstupu a minulého stavu) rozšířená o paměť <span class="math inline">\(c\)</span> a tři řídící brány: input, output a v rozšířené verzi i forget. <span class="math display">\[
+\begin{aligned}
+\boldsymbol{i}_{t} &amp; \leftarrow \sigma\left(\boldsymbol{W}^{i} \boldsymbol{x}_{t}+\boldsymbol{V}^{i} \boldsymbol{h}_{t-1}+\boldsymbol{b}^{i}\right) \\
+\boldsymbol{f}_{t} &amp; \leftarrow \sigma\left(\boldsymbol{W}^{f} \boldsymbol{x}_{t}+\boldsymbol{V}^{f} \boldsymbol{h}_{t-1}+\boldsymbol{b}^{f}\right) \\
+\boldsymbol{o}_{t} &amp; \leftarrow \sigma\left(\boldsymbol{W}^{o} \boldsymbol{x}_{t}+\boldsymbol{V}^{o} \boldsymbol{h}_{t-1}+\boldsymbol{b}^{o}\right) \\
+\boldsymbol{c}_{t} &amp; \leftarrow \boldsymbol{f}_{t} \cdot \boldsymbol{c}_{t-1}+\boldsymbol{i}_{t} \cdot \tanh \left(\boldsymbol{W}^{y} \boldsymbol{x}_{t}+\boldsymbol{V}^{y} \boldsymbol{h}_{t-1}+\boldsymbol{b}^{y}\right) \\
+\boldsymbol{h}_{t} &amp; \leftarrow \boldsymbol{o}_{t} \cdot \tanh \left(\boldsymbol{c}_{t}\right)
+\end{aligned}
+\]</span> Aktivace <span class="math inline">\(\tanh\)</span> se používá schválně, aby nám nemohly explodovat gradienty (gradient je &lt; 1).</p>
+<blockquote>
+<p>Write down how the Gated Recurrent Unit (GRU) operates, including the explicit formulas. [10]</p>
+</blockquote>
+<figure>
+<img src="/Users/eugen/Library/Application%20Support/typora-user-../images/image-20210629174920463.png" alt="image-20210629174920463" /><figcaption aria-hidden="true">image-20210629174920463</figcaption>
+</figure>
+<p>GRU je LSTM upravené tak, aby mělo méně parametrů. Oproti LSTM má:</p>
+<ul>
+<li>Reset gate, který je takovým posunutým Output gatem z LSTM. Slouží k určení, jakou část minulého stavu potřebujeme v současném výpočtu</li>
+<li>Update gate, který se stará o to, kterou část minulého stavu chceme zapomenout a nahradit něčím novým</li>
+</ul>
+<p><span class="math display">\[
+\begin{array}{l}
+\boldsymbol{r}_{t} \leftarrow \sigma\left(\boldsymbol{W}^{r} \boldsymbol{x}_{t}+\boldsymbol{V}^{r} \boldsymbol{h}_{t-1}+\boldsymbol{b}^{r}\right) \\
+\boldsymbol{u}_{t} \leftarrow \sigma\left(\boldsymbol{W}^{u} \boldsymbol{x}_{t}+\boldsymbol{V}^{u} \boldsymbol{h}_{t-1}+\boldsymbol{b}^{u}\right) \\
+\hat{\boldsymbol{h}}_{t} \leftarrow \tanh \left(\boldsymbol{W}^{h} \boldsymbol{x}_{t}+\boldsymbol{V}^{h}\left(\boldsymbol{r}_{t} \cdot \boldsymbol{h}_{t-1}\right)+\boldsymbol{b}^{h}\right) \\
+\boldsymbol{h}_{t} \leftarrow \boldsymbol{u}_{t} \cdot \boldsymbol{h}_{t-1}+\left(1-\boldsymbol{u}_{t}\right) \cdot \hat{\boldsymbol{h}}_{t}
+\end{array}
+\]</span></p>
+<blockquote>
+<p>Describe Highway network computation. [5]</p>
+</blockquote>
+<p>Vypadá hodně podobně jako GRU, potažmo reziduální spojení. Do původní FC vrstvy <span class="math display">\[
+\boldsymbol{y} \leftarrow H\left(\boldsymbol{x}, \boldsymbol{W}_{H}\right)
+\]</span> přidáme přes trénovatelný gating i původní vstup <span class="math display">\[
+\boldsymbol{y} \leftarrow H\left(\boldsymbol{x}, \boldsymbol{W}_{H}\right) \cdot T\left(\boldsymbol{x}, \boldsymbol{W}_{T}\right)+\boldsymbol{x} \cdot\left(1-T\left(\boldsymbol{x}, \boldsymbol{W}_{T}\right)\right),
+\]</span> kde většinou <span class="math inline">\(T\left(\boldsymbol{x}, \boldsymbol{W}_{T}\right) \leftarrow \sigma\left(\boldsymbol{W}_{T} \boldsymbol{x}+\boldsymbol{b}_{T}\right)\)</span>.</p>
+<blockquote>
+<p>Why the usual dropout cannot be used on recurrent state? Describe how can the problem be alleviated with variational dropout. [5]</p>
+</blockquote>
+<p>Když budeme naivně náhodně dropovat ze stavu, nakonec nám tam moc dlouhodobých informací nezbyde — ale to je celý point RNN. Dropoutuje se ale běžně na vstupech i výstupech.</p>
+<p>Variational dropout používá jednu masku na vstupy, jednu masku na výstupy, a jednu masku na stav; tím pádem se masky nemění v čase, a na některých místech nám dlouhodobá informace zůstane.</p>
+<blockquote>
+<p>Describe layer normalization and write down an algorithm how it is used during training and an algorithm how it is used during inference. [5]</p>
+</blockquote>
+<p>Pro RNN lepší než batchnorm. Funguje stejně jako batchnorm, s tím rozdílem, že normalizuje úplně celou vrstvu v rámci jednoho examplu. Tedy pro vstupy <span class="math inline">\(x_i\)</span> dané vrstvy v rámci jednoho example <span class="math display">\[
+\begin{array}{l}
+\boldsymbol{\mu} \leftarrow \frac{1}{m} \sum_{i=1}^{m} \boldsymbol{x}^{(i)} \\
+\boldsymbol{\sigma}^{2} \leftarrow \frac{1}{m} \sum_{i=1}^{m}\left(\boldsymbol{x}^{(i)}-\mu\right)^{2} \\
+\hat{\boldsymbol{x}}^{(i)} \leftarrow\left(\boldsymbol{x}^{(i)}-\boldsymbol{\mu}\right) / \sqrt{\boldsymbol{\sigma}^{2}+\varepsilon} \\
+\boldsymbol{y}^{(i)} \leftarrow \boldsymbol{\gamma} \hat{\boldsymbol{x}}^{(i)}+\boldsymbol{\beta}
+\end{array}                 
+\]</span> Během inference si už nemusíme pamatovat předpočítané hodnoty <span class="math inline">\(\mu\)</span> a <span class="math inline">\(\sigma^2\)</span>, prostě je spočítáme z konkrétních vstupů, které dostaneme.</p>
+<blockquote>
+<p>Sketch a tagger architecture utilizing word embeddings, recurrent character-level word embeddings and two sentence-level bidirectional RNNs with a residual connection. [10]</p>
+</blockquote>
+<p>Nejblíže je tento slide, i když na konci by měla být ještě jedna vrstva.</p>
+<figure>
+<img src="../images/cle_rnn_gru.png" alt="img" /><figcaption aria-hidden="true">img</figcaption>
+</figure>
+<p>S dvěma vrstvami na konci s reziduálními spojenímy by to mohlo vypadat nějak takto.</p>
+<p><img src="../images/rnn-final.jpeg" alt="IMG_BC6F51DBC48F-1" style="zoom: 33%;" /></p>
+</body>
+</html>

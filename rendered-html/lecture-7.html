@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lecture-7</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <link rel="stylesheet" href="/Users/eugen/Library/Application Support/abnerworks.Typora/themes/vue.css" />
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="lekce-7">Lekce 7</h1>
+<blockquote>
+<p>Write down how is <span class="math inline">\(AP_{50}\)</span> computed. [5]</p>
+</blockquote>
+<ol type="1">
+<li>Pro každou ze tříd narankujeme bounding boxy podle confidence levelu</li>
+<li>V rámci jedné třídy postupujeme v pořadí z bodu (1) a kreslíme si precision/recall curve. Box bereme jako match pokud má <span class="math inline">\(IoU &gt; 0.5\)</span></li>
+<li>Upravíme křivku tak, aby byla monotónní</li>
+<li>AP pro jednu třídu je průměrná precision v recallu 0, 0.1, 0.2, …, 1.0, a AP pro celý dataset je průměr AP jednotlivých tříd</li>
+</ol>
+<figure>
+<img src="../images/precision_recall_curve_interpolated.jpg" alt="img" /><figcaption aria-hidden="true">img</figcaption>
+</figure>
+<blockquote>
+<p>Considering a Fast-RCNN architecture, draw overall network architecture, explain what a RoI-pooling layer is, show how the network parametrizes bounding boxes and write down the loss. Finally, describe non-maximum suppression and how is the Fast-RCNN prediction performed. [10]</p>
+</blockquote>
+<figure>
+<img src="../images/fast_rcnn.jpg" alt="img" /><figcaption aria-hidden="true">img</figcaption>
+</figure>
+<ol type="1">
+<li>Začátek jako VGG, získáme 14x14 reprezentaci obrázku</li>
+<li>Místo max poolingu na vyrobíme 7x7 reprezentaci pomocí RoI poolingu (viz níže)</li>
+<li>Získám tím 7x7 reprezentaci každého RoI, kterou proženu FC a softmaxem (jako ve VGG) abych získal její classu (kterých je <span class="math inline">\(K + 1\)</span>, abychom mohli říct “nic”), a bbox regresorem, abych získal její pozici (viz níže)</li>
+</ol>
+<h3 id="roi-pooling">RoI Pooling</h3>
+<p>RoI rozdělím na 7x7 binů, každý z nich zaokrouhlím na původní 14x14 reprezentaci (viz obrázek níže) a jen z nich udělám max pooling (čímž jeden ze 7x7 binů).</p>
+<p><img src="../../Downloads/roi_pooling.svgz" alt="roi_pooling.svgz" style="zoom:200%;" /></p>
+<h3 id="parametrizace-bounding-box">Parametrizace bounding box</h3>
+<p>Pozice je dána relativně k RoI. Konkrétně <span class="math display">\[
+\begin{aligned}
+t_{x} &amp;=\left(x-x_{r}\right) / w_{r}, \quad t_{y}=\left(y-y_{r}\right) / h_{r} \\
+t_{w} &amp;=\log \left(w / w_{r}\right), \quad t_{h}=\log \left(h / h_{r}\right)
+\end{aligned}
+\]</span> Logaritmy jsou ve <span class="math inline">\(w\)</span> a <span class="math inline">\(h\)</span> proto, že zmenšují range generovaných čísel (což ej pro síť vždycky fajn).</p>
+<h3 id="loss">Loss</h3>
+<p>Pro bbox se používá tzv. Huber loss, která se stará o gradient clipping. <span class="math display">\[
+\operatorname{smooth}_{L_{1}}(x)=\left\{\begin{array}{ll}
+0.5 x^{2} &amp; \text { if }|x|&lt;1 \\
+|x|-0.5 &amp; \text { otherwise }
+\end{array}\right.
+\]</span></p>
+<p><img src="/Users/eugen/Library/Application Support/typora-user-../images/image-20210629123616516.png" alt="image-20210629123616516" style="zoom: 33%;" /></p>
+<p>Celková loss ještě počítá s loss za klasifikaci, s tím, že loss za bbox se počítá jen pro “opravdové” třídy (tedy nesnažíme se bbox dávat kolem třídy “nic”), <span class="math display">\[
+L(\hat{c}, \hat{t}, c, t)=L_{\mathrm{cls}}(\hat{c}, c)+\lambda \cdot[c \geq 1] \cdot \sum_{i \in\{\mathrm{x}, \mathrm{y}, \mathrm{w}, \mathrm{h}\}} \operatorname{smooth}_{L_{1}}\left(\hat{t}_{i}-t_{i}\right)
+\]</span></p>
+<h3 id="inference">Inference</h3>
+<p>Non-maximum supression se stará o to, aby se nám jeden objekt nezahlásil v několika různých RoI. Ignoruje RoI, které mají IoU nad nějakou hranicí s jiným RoI ze stejné třídy, který je lepší. Lepší jsou takové RoI, které mají vyšší pnost správné třídy.</p>
+<blockquote>
+<p>Considering a Faster-RCNN architecture, describe the region proposal network (its architecture, what are anchors, what does the loss look like). [5]</p>
+</blockquote>
+<p><img src="../images/faster_rcnn_architecture.jpg" alt="img" style="zoom: 25%;" /></p>
+<h3 id="rpn">RPN</h3>
+<ol type="1">
+<li>Posouváme 3x3 window po získáne conv reprezentaci</li>
+<li>Pro každou pozici vygenerujeme <em>anchory</em>, většinou jich bývá devět (tři různé velikosti, tři různé poměry stran)</li>
+<li>Pro každý anchor predikujeme, jestli je v něm nějaký objekt (tj. jen binární cross-entropy loss nad sigmoidem), a pokud ano, tak kde leží jeho bbox.</li>
+</ol>
+<h3 id="trénink">Trénink</h3>
+<ol type="1">
+<li>Máme “opravdové” gold objekty i s umístěním</li>
+<li>Vygenerované anchory s největším překryvem s nějakým “opravdovým” objektem, a anchory s IoU &gt; 70%, bereme jako pozitivní příklady (třída: objekt)</li>
+<li>Anchory s IoU &lt; 30% bereme jako negativní příklady (třída: nic)</li>
+<li>Zbytek achorů ignorujeme</li>
+</ol>
+<p>Hlavy tedy trénujeme tak, aby správně předpovídaly třídu z (2) a (3), popř. ještě bbox těch “opravdových” objektů.</p>
+<h3 id="inference-1">Inference</h3>
+<ol type="1">
+<li>RPN vyhodí nějaké anchory spolu s tím, jestli na nich něco je a popř. kde</li>
+<li>Za pomocí non-maximum supression vyhodíme anchory ukazující na stejný objekt</li>
+<li>Zbytek non-background anchorů použijeme jako RoI ve zbytku Fast-RCNN sítě</li>
+</ol>
+<blockquote>
+<p>Considering Mask-RCNN architecture, describe the additions to a Faster-RCNN architecture (the RoI-Align layer, the new mask-producing head). [5]</p>
+</blockquote>
+<p>RoI Pooling je nahrazen RoI Align. Každý ze 7x7 binů si rozdělíme na 4 podbiny, a jejich hodnoty získáme bilineární interpolací hodnot z původní reprezentace 14x14. Tyto čtyři podbiny se zkombinují do finální hodnoty.</p>
+<figure>
+<img src="../images/roi-align.png" alt="image-20210629131428781" /><figcaption aria-hidden="true">image-20210629131428781</figcaption>
+</figure>
+<p>Pro vytvoření masky nejprve upscalujeme 7x7 reprezentaci zpět na 14x14, nebo 28x28. Poslední maskující konvoluce má tolik kanálů, kolik máme tříd, a masku tvoříme (a trénujeme) pro každou třídu zvlášť.</p>
+<figure>
+<img src="../images/mask-generating-layer.png" alt="image-20210629133903556" /><figcaption aria-hidden="true">image-20210629133903556</figcaption>
+</figure>
+<blockquote>
+<p>Write down the focal loss with class weighting, including the commonly used hyperparameter values. [5]</p>
+</blockquote>
+<p>Úprava loss tak, aby se nám pozitivní příklady objektů neutopily v těch negativních. <span class="math display">\[
+\mathcal{L}_{\text {focal-loss }}=-\left(1-p_{\text {model }}(y \mid x)\right)^{\gamma} \cdot \log p_{\text {model }}(y \mid x)
+\]</span> Pro <span class="math inline">\(\gamma = 0\)</span> je tato loss prostě cross-entropy, pro vyšší <span class="math inline">\(\gamma\)</span> vlastně snižujeme váhu loss u příkladů, u kterých si jsme hodně jistí výsledkem. Nejčastěji se používá <span class="math inline">\(\gamma = 2\)</span>.</p>
+<p>Navíc se ještě moůže každá třída různě navážit pevnou konstatnou, <span class="math display">\[
+-\alpha_{y} \cdot\left(1-p_{\text {model }}(y \mid x)\right)^{\gamma} \cdot \log p_{\text {model }}(y \mid x)
+\]</span> Pro vzácné třídy bývá nejčastěji používána hodnota <span class="math inline">\(\alpha = 0.25\)</span>.</p>
+<blockquote>
+<p>Draw the overall architecture of a RetinaNet architecture (the FPN architecture including the block combining feature maps of different resolutions; the classification and bounding box generation heads, including their output size). [5]</p>
+</blockquote>
+<p>Oproti ResNetu mají navíc ještě C6 a C7, tj celkově dělají 7 max poolingů.</p>
+<figure>
+<img src="../images/retina-net.png" alt="image-20210629151525773" /><figcaption aria-hidden="true">image-20210629151525773</figcaption>
+</figure>
+<p>Klasifikační hlava má na výstupu <span class="math inline">\(K\cdot A\)</span> kanálů. Kolem každého “pixelu” výstupu máme <span class="math inline">\(A\)</span> anchorů (většinou 9) a pro každý z nich potřebujeme říct pnost každé z <span class="math inline">\(K\)</span> tříd. Klasifikace je tedy plně obstarána těmito konvolucemi, žádný pooling už nenásleduje.</p>
+<p>Bounding boxová hlava má <span class="math inline">\(4 \cdot A\)</span> kanálů, pro každý anchor určuje hodnotu čtyřech parametrů.</p>
+<p>V rámci ResNetu jsou mezi C vrstvami prostě max poolingy, v FPN probíhá jednoduchý 2x upscaling (doslova stávající hodnota zkopíruje na ta nová místa) a featury zleva projdou 1x1 konvolucí, aby měly správný počet kanálů.</p>
+<p><img src="../images/fpn-block.png" alt="image-20210629152126867" style="zoom:50%;" /></p>
+<blockquote>
+<p>Draw the BiFPN block architecture, including the positions of all convolutions, BatchNorms and ReLUs. [5]</p>
+</blockquote>
+<figure>
+<img src="/Users/eugen/Library/Application%20Support/typora-user-../images/image-20210629154103859.png" alt="image-20210629154103859" /><figcaption aria-hidden="true">image-20210629154103859</figcaption>
+</figure>
+<p>Součást EfficientDet. Všechny bloky jsou 3x3 separabilní kovoluce s BN a ReLU. Důležité jsou reziduální hrany, a dva chybějící bloky v prostředním sloupci, do kterých vedla jen jedna hrana a tak bylo možné je odstranit bez změny výsledku.</p>
+<p>Downscaling je přes max pooling, upsampling jednoduše zkopírováním hodnot. Součet hodnot je navážený.</p>
+</body>
+</html>

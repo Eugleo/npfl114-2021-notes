@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lecture-3</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <link rel="stylesheet" href="/Users/eugen/Library/Application Support/abnerworks.Typora/themes/vue.css" />
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="lecture-3">Lecture 3</h1>
+<blockquote>
+<p>Considering a neural network with <span class="math inline">\(D\)</span> input neurons, a single ReLU hidden layer with <span class="math inline">\(H\)</span> units and softmax output layer with <span class="math inline">\(K\)</span> units, write down the formulas of the gradient of all the MLP parameters (two weight matrices and two bias vectors), assuming input <span class="math inline">\(x\)</span>, target <span class="math inline">\(t\)</span> and negative log likelihood loss. [10]</p>
+</blockquote>
+<p>Označme <span class="math inline">\(z\)</span> jako vstup do poslední vrstvy a <span class="math inline">\(g\)</span> jako zlatou distribuci, poté <span class="math inline">\(\frac{\partial L}{\partial \boldsymbol{z}}=\boldsymbol{o}-\boldsymbol{g}\)</span>. Zbytek z chain rule, stačí si rozkreslit síť do jednotlivých vrcholů.</p>
+<figure>
+<img src="../images/IMG_10958CBE3FD3-1.jpeg" alt="IMG_10958CBE3FD3-1" /><figcaption aria-hidden="true">IMG_10958CBE3FD3-1</figcaption>
+</figure>
+<blockquote>
+<p>Assume a network with MSE loss generated a single output <span class="math inline">\(o \in \mathbb{R}\)</span>, and the target output is <span class="math inline">\(g\)</span>. What is the value of the loss function itself, and what is the gradient of the loss function with respect to <span class="math inline">\(o\)</span>? [5]</p>
+</blockquote>
+<p>Hodnota loss je <span class="math inline">\((o - g)^2\)</span>, gradient je prostě derivace přechozího výrazu, tedy <span class="math inline">\(2(o - g)\)</span>.</p>
+<blockquote>
+<p>Assume a network with cross-entropy loss generated a single output <span class="math inline">\(z \in \mathbb{R}\)</span>, which is passed through the sigmoid output activation function, producing <span class="math inline">\(o = \sigma(z)\)</span> If the target output is <span class="math inline">\(g\)</span>, what is the value of the loss function itself, and what is the gradient of the loss function with respect to <span class="math inline">\(z\)</span>? [5]</p>
+</blockquote>
+<p>Hodnota loss je <span class="math inline">\(- ∑ g_i \log \boldsymbol{o_i}\)</span>. Gradient se těžko počítá vůči <span class="math inline">\(o\)</span>, ale vůči <span class="math inline">\(z\)</span> je roven <span class="math inline">\(o-g\)</span>.</p>
+<blockquote>
+<p>Assume a network with cross-entropy loss generated a k-element output <span class="math inline">\(z \in \mathbb{R}^K\)</span>, which is passed through the softmax output activation function, producing <span class="math inline">\(o=softmax(z)\)</span>. If the target distribution is <span class="math inline">\(g\)</span>, what is the value of the loss function itself, and what is the gradient of the loss function with respect to <span class="math inline">\(z\)</span>? [5]</p>
+</blockquote>
+<p>Hodnota loss je <span class="math inline">\(- ∑ g_i \log \boldsymbol{o_i}\)</span>. Gradient se těžko počítá vůči <span class="math inline">\(o\)</span>, ale vůči <span class="math inline">\(z\)</span> je roven <span class="math inline">\(\boldsymbol{o}-\boldsymbol{g}\)</span>.</p>
+<blockquote>
+<p>Define L2 regularization and describe its effect both on the value of the loss function and on the value of the loss function gradient. [5]</p>
+</blockquote>
+<p>Regularizace je obecně cokoli, co má za cíl snížit generalizační chybu. L2 regularizace zmenšuje váhy, <span class="math display">\[
+\tilde{J}(\boldsymbol{\theta} ; \mathbb{X})=J(\boldsymbol{\theta} ; \mathbb{X})+\lambda\|\boldsymbol{\theta}\|_{2}^{2},
+\]</span> což se poté projeví v gradientu jako <span class="math display">\[
+\boldsymbol{\theta}_{i} \leftarrow \boldsymbol{\theta}_{i}-\alpha \frac{\partial J}{\partial \boldsymbol{\theta}_{i}}-2 \alpha \lambda \boldsymbol{\theta}_{i}
+\]</span></p>
+<blockquote>
+<p>Describe the dropout method and write down exactly how is it used during training and during inference. [5]</p>
+</blockquote>
+<p>Chceme, aby naše neurony (resp. jejich váhy) byly dobré a nezávislé na ostatních, proto při trénování s pností <span class="math inline">\(p\)</span> neuron vyřadíme (tj nastavíme mu hodnotu 0).</p>
+<p>Při inferenci k dropoutu nedochází, a protože máme najednou více neuronů než jsme měli při trénování, naškálujeme všechny jejich výstupy <span class="math inline">\((1-p)\)</span> krát. Případně můžeme naopak při tréninku naškálovat výstupy neuronů nahoru, <span class="math inline">\(1/(1-p)\)</span> krát.</p>
+<blockquote>
+<p>Describe how label smoothing works for cross-entropy loss, both for sigmoid and softmax activations. [5]</p>
+</blockquote>
+<p>Někdy dochází k overfittingu, protože se MLE snaží dotáhnout poslední procentíčko v nějaké 99,99% predikci — taková predikce nám ale běžně stačí. Proto jako gold distribuci nebereme one-hot, ale <span class="math inline">\((1 - \alpha) \cdot \bold{1}_{gold} + \alpha \cdot 1/(\text{# classes})\)</span>.</p>
+<figure>
+<img src="../images/IMG_D295C532AEB2-1.jpeg" alt="IMG_D295C532AEB2-1" /><figcaption aria-hidden="true">IMG_D295C532AEB2-1</figcaption>
+</figure>
+<blockquote>
+<p>How are weights and biases initialized using the default Glorot initialization? [5]</p>
+</blockquote>
+<p>Biasy na 0, matice <span class="math inline">\(\mathbb{R}^{m \times n}\)</span> z distribuce <span class="math inline">\(U\left[-\sqrt{\frac{6}{m+n}}, \sqrt{\frac{6}{m+n}}\right]\)</span>.</p>
+<p>Váhy nemohou být všechny 0, protože by se všechny trénovaly stejně — proto je inicializujeme náhodně. Tyto konkrétní hodnoty volíme proto, aby rozptyl vygenerovaných matic byl <span class="math inline">\(1/n\)</span>, což poté pomůže zachovat stabilní rozptyl napříč skrytými vrstvami. Ten chceme proto, že pokud by se rozptyl měnil, například rostl, rostly by nám i hodnoty aktivací a gradienty.</p>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lecture-10</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <link rel="stylesheet" href="/Users/eugen/Library/Application Support/abnerworks.Typora/themes/vue.css" />
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="lekce-10-35">Lekce 10 [35]</h1>
+<blockquote>
+<p>Draw a sequence-to-sequence architecture for machine translation, both during training and during inference (without attention). [5]</p>
+</blockquote>
+<p>Obecně je to síť složená ze dvou částí.</p>
+<p><img src="../images/seq-2-seq.png" alt="image-20210630094550876" style="zoom: 50%;" /></p>
+<p>Během tréninku se využívá <strong>teacher forcing</strong>, v dekodéru dostáváme na vstupu (W, X, Y, Z) gold sekvenci.</p>
+<p><img src="../images/seq-2-seq-decoder-training.png" alt="image-20210630094722699" style="zoom: 67%;" /></p>
+<p>Během inference gold sekvenci nemáme, takže buňce feedujeme výstup předchozí buňky. Tomu se říká <strong>autoregressive decoding</strong>.</p>
+<p><img src="../images/seq-2-seq-inference.png" alt="image-20210630094832956" style="zoom:67%;" /></p>
+<p>Konkrétně na výstupu děláme FC embedding, a pošleme ho do softmaxu (přímo výstup) a do argmaxu (vstup následující buňky).</p>
+<p>Někdy se kombinují už při trénování oba postupy, abychom i při trénování někdy viděli nesprávné vstupy (které jinack s čistým teacher forcingem nikdy nevidíme).</p>
+<blockquote>
+<p>Draw a sequence-to-sequence architecture for machine translation used during training, including the attention. Then write down how exactly is the attention computed. [10]</p>
+</blockquote>
+<p>Oproti původnímu seq-to-seq jsou dvě změny.</p>
+<ol type="1">
+<li>Encodér je obousměrný.</li>
+<li>Do dekodéru je přidaný attention, který mu v každém kroce umožňuje soustředit se na nějakou část vstupní věty.</li>
+</ol>
+<figure>
+<img src="/Users/eugen/Library/Application%20Support/typora-user-../images/image-20210630225829913.png" alt="image-20210630225829913" /><figcaption aria-hidden="true">image-20210630225829913</figcaption>
+</figure>
+<p>Konkrétně máme novou sadu trénovatelných vah, <span class="math inline">\(V\)</span> a <span class="math inline">\(W\)</span>, a v <span class="math inline">\(i\)</span>-tém kroce dekodéru definujeme <span class="math display">\[
+e_{i j}=\boldsymbol{v}^{\top} \tanh \left(\boldsymbol{V} \boldsymbol{h}_{j}+\boldsymbol{W} \boldsymbol{s}_{i-1}+\boldsymbol{b}\right),
+\]</span> tedy promítneme minulý stav <span class="math inline">\(s_{i-1}\)</span> a <span class="math inline">\(j\)</span>-tý vstup <span class="math inline">\(h_j\)</span> do stejně velké matice, abychom je mohli sečíst. Následně znormalizujeme tento výsledek tak, abychom dostali opravdové váhy <span class="math display">\[
+\boldsymbol{\alpha}_{i}=\operatorname{softmax}\left(\boldsymbol{e}_{i}\right),
+\]</span> zadefinujeme kontextové vektory jako vážený průměr jednotlivých vstupů <span class="math display">\[
+\boldsymbol{c}_{i}=\sum_{j} \alpha_{i j} \boldsymbol{h}_{j},
+\]</span> a nakonec tento kontext přidáme do vstupu buněk <span class="math display">\[
+\boldsymbol{s}_{i}=f\left(\boldsymbol{s}_{i-1}, \boldsymbol{y}_{i-1}, \boldsymbol{c}_{i}\right).
+\]</span> Značení je z tohoto obrázku.</p>
+<p><img src="../images/seq-2-seq-attn.png" alt="image-20210630231352968" style="zoom:50%;" /></p>
+<blockquote>
+<p>Explain how can word embeddings tying be used in a sequence-to-sequence architecture. [5]</p>
+</blockquote>
+<p>Na embedding vstupních slov a na embedding výsledných embeddingů zpět do slov se používají stejné matice (jen ta druhá je transponovaná).</p>
+<p><img src="../images/tying-word-embeddings.png" alt="image-20210630225502869" style="zoom: 67%;" /></p>
+<blockquote>
+<p>Write down why are subword units used in text processing, and describe the BPE algorithm for constructing a subword dictionary from a large corpus. [5]</p>
+</blockquote>
+<p>Když máme <em>generovat</em> slova mimo slovník, nemůžeme použít character-level embeddingy; respektive můžeme, ale nefunguje to dobře, protože generovat nová slova po znacích je náročné. Proto se ke generování “nových” slov používají místo znaků delší kusy slov.</p>
+<ol type="1">
+<li>Ve slovníku budeme mít samostatná písmena + speciální znak označující konec slova.</li>
+<li>Dvojici “slov” ze slovníku, která se v korpusu vyskytuje nejčastěji, spojíme. Dbáme ale na to, aby EOW nikd nebyl uvnitř takto spojené dvojice.</li>
+<li>Iterujeme.</li>
+</ol>
+<blockquote>
+<p>Write down why are subword units used in text processing, and describe the WordPieces algorithm for constructing a subword dictionary from a large corpus. [5]</p>
+</blockquote>
+<p>Když máme <em>generovat</em> slova mimo slovník, nemůžeme použít character-level embeddingy; respektive můžeme, ale nefunguje to dobře, protože generovat nová slova po znacích je náročné. Proto se ke generování “nových” slov používají místo znaků delší kusy slov.</p>
+<ol type="1">
+<li>Spočítáme unigram probability pro každé podslovo ze slovníku (tj počet výskytů / počet slov)</li>
+<li>Spočítáme pravděpodobnost celého textu v této unigramové ditribuci</li>
+<li>Rozdělíme text na podslova, tak, že hladově bereme nejdelší match ze slovníku (a přičteme k jeho počtu jedničku)</li>
+<li>Slovník tvoříme tak, že opět začneme od jednotlivých písmen, a poté mergujeme takové dvojice podslov (nalezených ve (3)), která nejvíce zvýší skóre z (2).</li>
+</ol>
+<blockquote>
+<p>Pinpoint the differences between the BPE and WordPieces algorithms, both during dictionary construction and during inference. [5]</p>
+</blockquote>
+<p>V BPE konstruujeme slovník od písmen, spojujeme nejčastější dvojice. Ve WordPieces jdeme rovněž od písmen, ale spojujeme ty dvojice, které nejvýše zvednou unigram probability celého korpusu. To bude často ta stejná dvojice jako v BPE, ale ne vždy — bereme totiž v úvahu i původní počet výskytů těch jednotlivých podslov.</p>
+<p>Během inference musíme v BPE konstruovat slovník vždy ve stejném pořadí, protože při tréninku s tím takto počítáme. Ve WordPieces se i při tréninku rozdělení textu na podslova stále mění (je to v bodě (3)), takže nám to při inferenci nevadí.</p>
+<p>Jinými slovy, BPE je pomalejší v inferenci, WordPieces v konstruování slovníku.</p>
+</body>
+</html>

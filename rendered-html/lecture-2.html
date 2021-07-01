@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lecture-2</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <link rel="stylesheet" href="/Users/eugen/Library/Application Support/abnerworks.Typora/themes/vue.css" />
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="lekce-2">Lekce 2</h1>
+<blockquote>
+<p>Describe maximum likelihood estimation, as minimizing NLL, cross-entropy and KL divergence. [10]</p>
+</blockquote>
+<p>Self information</p>
+<ul>
+<li><span class="math inline">\(I(x) = -\log P(x)\)</span></li>
+<li>Jak moc jsme překvapeni, když dostaneme <span class="math inline">\(x \sim P\)</span></li>
+<li>Pro nezávislé jevy se sčítá, pro jevy s pností 1 je rovna 0</li>
+</ul>
+<p>Entropie</p>
+<ul>
+<li><span class="math inline">\(H(P) = \mathbb{E}_{x \sim P} [I(x)] = - \mathbb{E}_{x \sim P} [\log P(x)]\)</span></li>
+<li>Množství překvapení v distribuci <span class="math inline">\(P\)</span></li>
+</ul>
+<p>Cross-entropy</p>
+<ul>
+<li><span class="math inline">\(H(P, Q) = -\mathbb{E}_{x\sim P} [\log Q] = \mathbb{E}_{x\sim P} [I_Q(x)]\)</span></li>
+<li>V podmíněném případě pak <span class="math inline">\(H(Y|X) = H(X, Y) - H(X)\)</span>, tedy jak moc jsem překvapen když se dozvím obojí oproti tomu, když se dozvím jen <span class="math inline">\(X\)</span></li>
+<li>Měří, jak moc budu překvapený, když budu tahat <span class="math inline">\(x\)</span> z distribuce <span class="math inline">\(P\)</span>, ale své překvapení budu měřit na základě distribuce <span class="math inline">\(Q\)</span></li>
+</ul>
+<p>Kullback-Leibler Divergence</p>
+<ul>
+<li><span class="math inline">\(D_{KL}(P || Q) = H(P, Q) - H(P) = -\mathbb{E}_{x\sim P} [\log P - \log Q]\)</span></li>
+<li>Není symetrická</li>
+<li>V zásadě říká, jak “špatná” je moje distribuce <span class="math inline">\(Q\)</span>. Konkrétně zjišťuje o jak moc více budu překvapen, když tahám <span class="math inline">\(x\)</span> z <span class="math inline">\(P\)</span>, ale překvapení měřím skrze <span class="math inline">\(Q\)</span>
+<ul>
+<li>Čím jsou si <span class="math inline">\(Q\)</span> a <span class="math inline">\(P\)</span> podobnější, tím menší tohle “překvapení navíc” bude</li>
+</ul></li>
+</ul>
+<p>MLE</p>
+<ul>
+<li>Samo o sobě je to takové hledání parametrů modelu, aby <span class="math display">\[
+\theta_{\mathrm{ML}}=\underset{\theta}{\arg \max} \space p_{\text {model }}(\mathbb{X} ; \theta)
+\]</span> Což se dá dále upravovat, až se dostaneme NLL, binární crossentropii, a KL divergenci</li>
+</ul>
+<figure>
+<img src="../images/IMG_C7542DD4DE41-1.jpeg" alt="IMG_C7542DD4DE41-1" /><figcaption aria-hidden="true">IMG_C7542DD4DE41-1</figcaption>
+</figure>
+<blockquote>
+<p>Define mean squared error and show how it can be derived using MLE. [5]</p>
+</blockquote>
+<p><span class="math display">\[
+MSE = \mathbb{E}[(\hat{y} - y)^2] = \frac{1}{m} \sum_{i=1}^m \left((f(x_i; \theta) - y_i)^2\right)
+\]</span></p>
+<p>Pokud se nám při regresi nechce odhadovat celá distribuce, můžeme si usnadnit práci, predikovat pouze její střední hodnotu a říct, že ta distribuce je normální s nějakým rozptylem (a s tou naší střední hodnotou).</p>
+<p>Dává to smysl, protože normální rozdělení má mezi rozděleními se stejnou střední hodnotou a rozptylem maximální entropii, tedy nejméně navíc vnesené informace.</p>
+<p>MLE potom vyjde <span class="math display">\[
+\begin{aligned}
+\arg \max _{\boldsymbol{\theta}} p(y \mid \boldsymbol{x} ; \boldsymbol{\theta}) &amp;=\underset{\boldsymbol{\theta}}{\arg \min } \sum_{i=1}^{m}-\log p\left(y^{(i)} \mid \boldsymbol{x}^{(i)} ; \boldsymbol{\theta}\right) \\
+&amp;=\underset{\boldsymbol{\theta}}{\arg \min }-\sum_{i=1}^{m} \log \sqrt{\frac{1}{2 \pi \sigma^{2}}} \exp\left({-\frac{\left(y^{(i)}-\hat{y}\left(\boldsymbol{x}^{(i)} ; \boldsymbol{\theta}\right)\right)^{2}}{2 \sigma^{2}}}\right) \\
+&amp;=\underset{\boldsymbol{\theta}}{\arg \min }-m \log \left(2 \pi \sigma^{2}\right)^{-1 / 2}-\sum_{i=1}^{m}-\frac{\left(y^{(i)}-\hat{y}\left(\boldsymbol{x}^{(i)} ; \boldsymbol{\theta}\right)\right)^{2}}{2 \sigma^{2}} \\
+&amp;=\underset{\boldsymbol{\theta}}{\arg \min } \sum_{i=1}^{m} \frac{\left(y^{(i)}-\hat{y}\left(\boldsymbol{x}^{(i)} ; \boldsymbol{\theta}\right)\right)^{2}}{2 \sigma^{2}}=\underset{\boldsymbol{\theta}}{\arg \min } \frac{1}{m} \sum_{i=1}^{m}\left(y^{(i)}-\hat{y}\left(\boldsymbol{x}^{(i)} ; \boldsymbol{\theta}\right)\right)^{2}
+\end{aligned}
+\]</span> To <span class="math inline">\(1/m\)</span> jsme si nakonec přimysleli, protože můžeme. MSE tedy dává smysl jako loss funkce, ale <strong>pouze pokud má náš estimátor pevný rozptyl (tj. vlastně chybu) <span class="math inline">\(\sigma^2\)</span></strong>.</p>
+<blockquote>
+<p>Describe gradient descent and compare it to stochastic (i.e., online) gradient descent and minibatch stochastic gradient descent. [5]</p>
+</blockquote>
+<p>Pokud máme nějaký loss <span class="math inline">\(L\)</span> a nějaká trénovací data, chceme při tréninku minimalizovat <span class="math display">\[
+J(\boldsymbol{\theta})=\mathbb{E}_{(\boldsymbol{x}, y) \sim \hat{p}_{\text {data }}} L(f(\boldsymbol{x} ; \boldsymbol{\theta}), y)
+\]</span> Což můžeme udělat v krocích pomocí tzv. <strong>gradient descent</strong> s learning rate <span class="math inline">\(\alpha\)</span> <span class="math display">\[
+\boldsymbol{\theta} \leftarrow \boldsymbol{\theta}-\alpha \nabla_{\boldsymbol{\theta}} J(\boldsymbol{\theta})
+\]</span> Druhy</p>
+<ul>
+<li>V běžném GD počítáme <span class="math inline">\(J\)</span> a jeho gradient ze všech trénovacích dat</li>
+<li>V <strong>online (stochastic) gradient descent</strong> nasamplujeme pouze jedno dato</li>
+<li>V <strong>minibatch SGD</strong> vybereme <span class="math inline">\(m\)</span> samplů, ze kterých poté odhadujeme střední hodnotu <span class="math inline">\(J\)</span></li>
+</ul>
+<blockquote>
+<p>Formulate conditions on the sequence of learning rates used in SGD to converge to optimum almost surely. [5]</p>
+</blockquote>
+<p>SGD skoro jistě konverguje k optimu, pokud je naše loss spojitá a konvexní a zároveň pro learning raty platí <span class="math display">\[
+\forall i: \alpha_{i}&gt;0, \quad \sum_{i} \alpha_{i}=\infty, \quad \sum_{i} \alpha_{i}^{2}&lt;\infty
+\]</span> Tedy můžeme složením krůčků dojít kamkoli, ale zároveň musí platit <span class="math inline">\(\alpha \to 0\)</span>. Konkrétně to <em>na druhou</em> se tam vyskytuje za MSE, říká v podstatě že “nabraná chyba bude konečná”.</p>
+<blockquote>
+<p>Write down the backpropagation algorithm. [5]</p>
+</blockquote>
+<p>Chceme spočítat derivaci posledního vrcholu (<span class="math inline">\(u_n\)</span>) vzhledem ke všem předešlým vrcholům. Tím získáme derivaci loss vůči parametrům, což je to, co potřebujeme do SGD.</p>
+<ol type="1">
+<li>Spustíme forward propagation, kterým spočteme hodnoty všech vrcholů</li>
+<li>Nastavíme <span class="math inline">\(g_n = 1\)</span></li>
+<li>Od konce počítáme <span class="math inline">\(g_i\)</span> jako <span class="math inline">\(\sum_{j: i \in P\left(u^{(j)}\right)} g^{(j)} \frac{\partial u^{(j)}}{\partial u^{(i)}}\)</span>, využití chain rule</li>
+</ol>
+<blockquote>
+<p>Write down the mini-batch SGD algorithm with momentum. Then, formulate SGD with Nesterov momentum and show the difference between them. [5]</p>
+</blockquote>
+<p><span class="math display">\[
+\begin{array}{l}
+\boldsymbol{g} \leftarrow \frac{1}{m} \nabla_{\boldsymbol{\theta}} \sum_{i} L\left(f\left(\boldsymbol{x}^{(i)} ; \boldsymbol{\theta}\right), \boldsymbol{y}^{(i)}\right) \\
+\boldsymbol{v} \leftarrow \beta \boldsymbol{v}-\alpha \boldsymbol{g} \\
+\boldsymbol{\theta} \leftarrow \boldsymbol{\theta}+\boldsymbol{v}
+\end{array}
+\]</span></p>
+<p>Navíc oproti SGD tam je to <span class="math inline">\(v\)</span>, které zajišťuje roli “kudy jsme šli minule”. V Nestor momentum je to pak jen trochu pozměněno, <em>momentum krok</em> se dělá <em>před</em> výpočtem gradientu, tak, aby ten samotný gradient byl přesnější. <span class="math display">\[
+\begin{array}{l}
+\boldsymbol{\theta} \leftarrow \boldsymbol{\theta}+\boldsymbol{\beta} \boldsymbol{v}\\
+\boldsymbol{g} \leftarrow \frac{1}{m} \nabla_{\boldsymbol{\theta}} \sum_{i} L\left(f\left(\boldsymbol{x}^{(i)} ; \boldsymbol{\theta}\right), y^{(i)}\right) \\
+\boldsymbol{v} \leftarrow \beta \boldsymbol{v}-\alpha \boldsymbol{g} \\
+\boldsymbol{\theta} \leftarrow \boldsymbol{\theta}-\alpha \boldsymbol{g}
+\end{array}
+\]</span></p>
+<blockquote>
+<p>Write down the AdaGrad algorithm and show that it tends to internally decay learning rate by a factor of <span class="math inline">\(1/t\)</span> in step <span class="math inline">\(t\)</span>. Then write down the RMSProp algorithm and explain how it solves the problem with the involuntary learning rate decay. [10]</p>
+</blockquote>
+<p><span class="math display">\[
+\begin{array}{l}
+\boldsymbol{g} \leftarrow \frac{1}{m} \nabla_{\boldsymbol{\theta}} \sum_{i} L\left(f\left(\boldsymbol{x}^{(i)} ; \boldsymbol{\theta}\right), y^{(i)}\right) \\
+\boldsymbol{r} \leftarrow \boldsymbol{r}+\boldsymbol{g}^{2} \\
+\boldsymbol{\theta} \leftarrow \boldsymbol{\theta}-\frac{\alpha}{\sqrt{\boldsymbol{r}+\varepsilon}} \boldsymbol{g}
+\end{array}
+\]</span></p>
+<p>Velikosti gradientu normalizujeme, aby se paramentry s různými rozptyly měnily zhruba stejně. To, co máme uloženo v <span class="math inline">\(r\)</span>, si můžeme představit zhruba jako <span class="math inline">\(\sigma^2\)</span> jednotlivých složek, takže vydělení learning ratu <span class="math inline">\(\sqrt{r + \varepsilon}\)</span> provede normalizaci.</p>
+<p>Pokud zůstávají gradienty dlouho stejné, tj <span class="math inline">\(g \approx g_0\)</span>, tak po <span class="math inline">\(t\)</span> krocích algoritmu je <span class="math inline">\(r \approx t \cdot g_0^2\)</span>, a proto <span class="math display">\[
+\frac{\alpha}{\sqrt{\boldsymbol{r}+\varepsilon}} \approx \frac{\alpha / \sqrt{t}}{\sqrt{\boldsymbol{g}_{0}^{2}+\varepsilon / t}},
+\]</span> jinými slovy, jako kdybychom learning rate škálovali <span class="math inline">\(1/\sqrt{t}\)</span>, což zpravidla nechceme, protože to může být moc rychlé.</p>
+<p>RMSPRop funguje podobně, ale <span class="math inline">\(r\)</span> počítáme tak, aby zhruba odpovídalo střední hodnotě poslechních <span class="math inline">\(g^2\)</span> — počítáme exponenciální průměr posledních několika hodnot. <span class="math display">\[
+\begin{array}{l}
+\boldsymbol{g} \leftarrow \frac{1}{m} \nabla_{\boldsymbol{\theta}} \sum_{i} L\left(f\left(\boldsymbol{x}^{(i)} ; \boldsymbol{\theta}\right), y^{(i)}\right) \\
+\boldsymbol{r} \leftarrow \beta \boldsymbol{r}+(1-\beta) \boldsymbol{g}^{2} \\
+\boldsymbol{\theta} \leftarrow \boldsymbol{\theta}-\frac{\alpha}{\sqrt{\boldsymbol{r}+\varepsilon}} \boldsymbol{g}
+\end{array}
+\]</span> Jak tento exponenciální průměr funguje je ukázáno na následujícím obrázku.</p>
+<figure>
+<img src="../images/exp_prumer.png" alt="exp_prumer" /><figcaption aria-hidden="true">exp_prumer</figcaption>
+</figure>
+<blockquote>
+<p>Write down the Adam algorithm. Then show why the bias-correction terms <span class="math inline">\((1−\beta ^ t)\)</span> make the estimation of the first and second moment unbiased. [10]</p>
+</blockquote>
+<p>Adam je spojením momentum a RMSProp. <span class="math display">\[
+\begin{array}{l}
+\boldsymbol{g} \leftarrow \frac{1}{m} \nabla_{\boldsymbol{\theta}} \sum_{i} L\left(f\left(\boldsymbol{x}^{(i)} ; \boldsymbol{\theta}\right), y^{(i)}\right)\\
+t \leftarrow t+1\\
+\boldsymbol{s} \leftarrow \beta_{1} \boldsymbol{s}+\left(1-\beta_{1}\right) \boldsymbol{g} \text { (biased first moment estimate) }\\
+\boldsymbol{r} \leftarrow \beta_{2} \boldsymbol{r}+\left(1-\beta_{2}\right) \boldsymbol{g}^{2} \text { (biased second moment estimate) }\\
+\hat{\boldsymbol{s}} \leftarrow \boldsymbol{s} /\left(1-\beta_{1}^{t}\right), \hat{\boldsymbol{r}} \leftarrow \boldsymbol{r} /\left(1-\beta_{2}^{t}\right)\\
+\boldsymbol{\theta} \leftarrow \boldsymbol{\theta}-\frac{\alpha}{\sqrt{\hat{\boldsymbol{r}}+\varepsilon}} \hat{\boldsymbol{s}}
+\end{array}
+\]</span> První moment odpovídá momentum, druhý používáme kvůli normalizaci LR, stříškové verze složí jako korekce biasů. Po <span class="math inline">\(t\)</span> krocích totiž <span class="math inline">\(r\)</span> vypadá jako <span class="math display">\[
+\boldsymbol{r}_{t}=\left(1-\beta_{2}\right) \sum_{i=1}^{t} \beta_{2}^{t-i} \boldsymbol{g}_{i}^{2}
+\]</span> Tedy jako bych dělal vážený průměr nějakých prvků s celkovouv vahou <span class="math display">\[
+\left(1-\beta_{2}\right) \sum_{i=1}^{t} \beta_{2}^{t-i}=\left(1-\beta_{2}\right) \frac{1-\beta_{2}^{t}}{1-\beta_{2}}=1-\beta_{2}^{t} .
+\]</span> Jinými slovy, <span class="math display">\[
+\mathbb{E}\left[\boldsymbol{r}_{t}\right] \approx \mathbb{E}\left[\boldsymbol{g}^{2}\right] \cdot\left(1-\beta_{2}^{t}\right)
+\]</span> A biasu se tedy zbavím vydělením.</p>
+</body>
+</html>
