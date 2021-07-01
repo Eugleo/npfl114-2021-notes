@@ -4,7 +4,7 @@
 
 Linear-chain CRF je lineární graf, ve kterém hrany definují závislosti mezi prvky výstupní sekvence.
 
-<img src="/Users/eugen/Documents/deep-learning-notes/images/crf.png" alt="image-20210629205015731" style="zoom:50%;" />
+<img src="images/crf.png" alt="image-20210629205015731" style="zoom:50%;" />
 
 Skóre nějaké výstupní sekvence $y$ v závislosti na vstupu $X$ se počítá jako součet pravděpodobnosti jednotlivých labelů $f(y_i | X)$ a přechodů mezi nimi $A_{y_{i-1} y_i}$.
 $$
@@ -31,7 +31,7 @@ $$
 
 Algoritmus je stejný jako výše, pouze místo logsumexpů se použije max. Také musíme sledovat, _kde_ bylo maxima dosaženo.
 
-![image-20210629215723224](/Users/eugen/Documents/deep-learning-notes/images/crf-decoding.png)
+![image-20210629215723224](images/crf-decoding.png)
 
 > In the context of CTC loss, describe regular and extended labelings and write down an algorithm for computing the log probability of a gold label sequence $y$. [10]
 
@@ -79,13 +79,13 @@ Reálně to pak celé bude zlogaritmováno, tj. místo násobení bude $+$ a mí
 
 Embedding je matice $W_{V\times N}$. Za output vrstvou je Softmax, který rozhoduje, které že slovo bylo v díře mezi těmi vstupními.
 
-<img src="/Users/eugen/Documents/deep-learning-notes/images/w2v-cbow.png" alt="img" style="zoom:67%;" />
+<img src="images/w2v-cbow.png" alt="img" style="zoom:67%;" />
 
 > Draw the SkipGram architecture from `word2vec`, including the sizes of the inputs and the sizes of the outputs and used non-linearities. Also make sure to indicate where are the embeddings being trained. [5]
 
 Aktivace je opět softmax, embeddingem je opět matice $W_{V\times N}$. Z jednoho slova predikujeme jeho kontext.
 
-<img src="/Users/eugen/Documents/deep-learning-notes/images/w2v-skip-gram.png" alt="img" style="zoom:50%;" />
+<img src="images/w2v-skip-gram.png" alt="img" style="zoom:50%;" />
 
 > Describe the hierarchical softmax used in `word2vec`. [5]
 

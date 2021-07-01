@@ -34,7 +34,7 @@ MLE
   $$
   Což se dá dále upravovat, až se dostaneme NLL, binární crossentropii, a KL divergenci
 
-![IMG_C7542DD4DE41-1](/Users/eugen/Documents/deep-learning-notes/images/IMG_C7542DD4DE41-1.jpeg)
+![IMG_C7542DD4DE41-1](images/IMG_C7542DD4DE41-1.jpeg)
 
 > Define mean squared error and show how it can be derived using MLE. [5]
 
@@ -137,7 +137,7 @@ $$
 $$
 Jak tento exponenciální průměr funguje je ukázáno na následujícím obrázku.
 
-![exp_prumer](/Users/eugen/Documents/deep-learning-notes/images/exp_prumer.png)
+![exp_prumer](images/exp_prumer.png)
 
 > Write down the Adam algorithm. Then show why the bias-correction terms $(1−\beta ^ t)$ make the estimation of the first and second moment unbiased. [10]
 

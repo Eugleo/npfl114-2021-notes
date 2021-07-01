@@ -4,7 +4,7 @@
 
 Označme $z$ jako vstup do poslední vrstvy a $g$ jako zlatou distribuci, poté $\frac{\partial L}{\partial \boldsymbol{z}}=\boldsymbol{o}-\boldsymbol{g}$. Zbytek z chain rule, stačí si rozkreslit síť do jednotlivých vrcholů.
 
-![IMG_10958CBE3FD3-1](/Users/eugen/Documents/deep-learning-notes/images/IMG_10958CBE3FD3-1.jpeg)
+![IMG_10958CBE3FD3-1](images/IMG_10958CBE3FD3-1.jpeg)
 
 > Assume a network with MSE loss generated a single output $o \in \mathbb{R}$, and the target output is $g$. What is the value of the loss function itself, and what is the gradient of the loss function with respect to $o$? [5]
 
@@ -39,7 +39,7 @@ Při inferenci k dropoutu nedochází, a protože máme najednou více neuronů 
 
 Někdy dochází k overfittingu, protože se MLE snaží dotáhnout poslední procentíčko v nějaké 99,99% predikci — taková predikce nám ale běžně stačí. Proto jako gold distribuci nebereme one-hot, ale $(1 - \alpha) \cdot \bold{1}_{gold} + \alpha \cdot 1/(\text{# classes})$.
 
-![IMG_D295C532AEB2-1](/Users/eugen/Documents/deep-learning-notes/images/IMG_D295C532AEB2-1.jpeg)
+![IMG_D295C532AEB2-1](images/IMG_D295C532AEB2-1.jpeg)
 
 > How are weights and biases initialized using the default Glorot initialization? [5]
 

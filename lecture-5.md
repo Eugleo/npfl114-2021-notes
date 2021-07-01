@@ -12,7 +12,7 @@ V bottleneck bloku jsou konvoluce tři, dvě z nich 1x1. Ušetří to parametry,
 
 Celá síť má několik takovýchto bottleneck bloků za sebou, se zvyšujícím se počtem kanálů uprostřed.
 
-![image-20210628104841061](/Users/eugen/Documents/deep-learning-notes/images/image-20210628104841061.png)
+![image-20210628104841061](images/image-20210628104841061.png)
 
 Mezi vrstvami convN_x se místo max poolingu dělá konvoluce se stridem 2, čímž se zamezí ztrátě informace.
 
@@ -34,11 +34,11 @@ To funguje (z části i) proto, že při součtu výsledku s resiudální hranou
 
 V ResNeXt rozdělíme blok na několik podbloků s menším počtem vnitřních kanálů. Původně by například každý ze 64 výstupních kanálů mohl být ovlivněn jakýmkoli ze vstupních 64 kanálů, v ResNeXt tyto interakce omezíme — jeden kanál bude ovlivňován třeba čtyřmi jinými. (vlevo ResNet, vpravo ResNeXt)
 
-![image-20210628111053477](/Users/eugen/Documents/deep-learning-notes/images/resnext.png)
+![image-20210628111053477](images/resnext.png)
 
 S tím, že horní i spodní konvoluce můžeme sloučit do jedné.
 
-![image-20210628111412449](/Users/eugen/Documents/deep-learning-notes/images/image-20210628111412449.png)
+![image-20210628111412449](images/image-20210628111412449.png)
 
 > Describe the CNN regularization method of networks with stochastic depth. [5]
 
@@ -68,7 +68,7 @@ SE chce obecně dovolit kanálům nějakým způsobem globálně interagovat, a 
 
 Místo jedné CxC FC vrstvy máme dvě, první redukující na C/r a druhou naopak nafukující zpět na C. Oproti běžnému $C\to C$ tímto ušetříme parametry. (Podobná myšlenka jako u ResNet bottleneck bloků)
 
-<img src="/Users/eugen/Documents/deep-learning-notes/images/squeeze-and-excitation.png" alt="image-20210628115555438" style="zoom:50%;" />
+<img src="images/squeeze-and-excitation.png" alt="image-20210628115555438" style="zoom:50%;" />
 
 > Draw the Mobile inverted bottleneck block (including explanation of separable convolutions, the expansion factor, exact positions of BatchNorms and ReLUs, but without describing Squeeze and excitation bocks). [5]
 
@@ -76,7 +76,7 @@ Separable konvoluce nematchuje každý vstupní kanál ke každému z výstupní
 
 MIB bloky se chovají trochu jako bloky WideNetu, dostanou $F$ kanálů, rozšíří je pomocí 1x1 konvoluce, poté udělají 3x3 konvoluci (separovanou, aby byla rychlejší), jejíž výstupem je tedy opět stejné rozšířené množství kanálů, a ty pak transformují zpět opět 1x1 konvolucí. Tato poslední konvoluce je bez aktivační funkce, protože ReLU zahazuje informace, což zrovna v tomto zúženém místě nechceme.
 
-![image-20210629105003774](/Users/eugen/Documents/deep-learning-notes/images/mobile-inverted-block.png)
+![image-20210629105003774](images/mobile-inverted-block.png)
 
 > Assume an input image $I$ of size $H \times W$ with $C$ channels, and a convolutional kernel $K$ with size $N\times M $ stride $S$ and $O$ output channels. Write down (or derive) the equation of transposed convolution (or equivalently backpropagation through a convolution to its inputs). [5]
 

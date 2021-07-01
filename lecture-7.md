@@ -7,11 +7,11 @@
 3. Upravíme křivku tak, aby byla monotónní
 4. AP pro jednu třídu je průměrná precision v recallu 0, 0.1, 0.2, ..., 1.0, a AP pro celý dataset je průměr AP jednotlivých tříd
 
-![img](/Users/eugen/Documents/deep-learning-notes/images/precision_recall_curve_interpolated.jpg)
+![img](images/precision_recall_curve_interpolated.jpg)
 
 > Considering a Fast-RCNN architecture, draw overall network architecture, explain what a RoI-pooling layer is, show how the network parametrizes bounding boxes and write down the loss. Finally, describe non-maximum suppression and how is the Fast-RCNN prediction performed. [10]
 
-![img](/Users/eugen/Documents/deep-learning-notes/images/fast_rcnn.jpg)
+![img](images/fast_rcnn.jpg)
 
 1. Začátek jako VGG, získáme 14x14 reprezentaci obrázku
 2. Místo max poolingu na vyrobíme 7x7 reprezentaci pomocí RoI poolingu (viz níže)
@@ -57,7 +57,7 @@ Non-maximum supression se stará o to, aby se nám jeden objekt nezahlásil v n�
 
 > Considering a Faster-RCNN architecture, describe the region proposal network (its architecture, what are anchors, what does the loss look like). [5]
 
-<img src="/Users/eugen/Documents/deep-learning-notes/images/faster_rcnn_architecture.jpg" alt="img" style="zoom: 25%;" />
+<img src="images/faster_rcnn_architecture.jpg" alt="img" style="zoom: 25%;" />
 
 ### RPN
 
@@ -84,11 +84,11 @@ Hlavy tedy trénujeme tak, aby správně předpovídaly třídu z (2) a (3), pop
 
 RoI Pooling je nahrazen RoI Align. Každý ze 7x7 binů si rozdělíme na 4 podbiny, a jejich hodnoty získáme bilineární interpolací hodnot z původní reprezentace 14x14. Tyto čtyři podbiny se zkombinují do finální hodnoty.
 
-![image-20210629131428781](/Users/eugen/Documents/deep-learning-notes/images/roi-align.png)
+![image-20210629131428781](images/roi-align.png)
 
 Pro vytvoření masky nejprve upscalujeme 7x7 reprezentaci zpět na 14x14, nebo 28x28. Poslední maskující konvoluce má tolik kanálů, kolik máme tříd, a masku tvoříme (a trénujeme) pro každou třídu zvlášť.
 
-![image-20210629133903556](/Users/eugen/Documents/deep-learning-notes/images/mask-generating-layer.png)
+![image-20210629133903556](images/mask-generating-layer.png)
 
 > Write down the focal loss with class weighting, including the commonly used hyperparameter values. [5]
 
@@ -108,7 +108,7 @@ Pro vzácné třídy bývá nejčastěji používána hodnota $\alpha = 0.25$.
 
 Oproti ResNetu mají navíc ještě C6 a C7, tj celkově dělají 7 max poolingů.
 
-![image-20210629151525773](/Users/eugen/Documents/deep-learning-notes/images/retina-net.png)
+![image-20210629151525773](images/retina-net.png)
 
 Klasifikační hlava má na výstupu $K\cdot A$ kanálů. Kolem každého "pixelu" výstupu máme $A$ anchorů (většinou 9) a pro každý z nich potřebujeme říct pnost každé z $K$ tříd. Klasifikace je tedy plně obstarána těmito konvolucemi, žádný pooling už nenásleduje.
 
@@ -116,7 +116,7 @@ Bounding boxová hlava má $4 \cdot A$ kanálů, pro každý anchor určuje hodn
 
 V rámci ResNetu jsou mezi C vrstvami prostě max poolingy, v FPN probíhá jednoduchý 2x upscaling (doslova stávající hodnota zkopíruje na ta nová místa) a featury zleva projdou 1x1 konvolucí, aby měly správný počet kanálů.
 
-<img src="/Users/eugen/Documents/deep-learning-notes/images/fpn-block.png" alt="image-20210629152126867" style="zoom:50%;" />
+<img src="images/fpn-block.png" alt="image-20210629152126867" style="zoom:50%;" />
 
 > Draw the BiFPN block architecture, including the positions of all convolutions, BatchNorms and ReLUs. [5]
 

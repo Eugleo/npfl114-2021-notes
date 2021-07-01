@@ -4,15 +4,15 @@
 
 Obecně je to síť složená ze dvou částí.
 
-<img src="/Users/eugen/Documents/deep-learning-notes/images/seq-2-seq.png" alt="image-20210630094550876" style="zoom: 50%;" />
+<img src="images/seq-2-seq.png" alt="image-20210630094550876" style="zoom: 50%;" />
 
 Během tréninku se využívá **teacher forcing**, v dekodéru dostáváme na vstupu (W, X, Y, Z) gold sekvenci.
 
-<img src="/Users/eugen/Documents/deep-learning-notes/images/seq-2-seq-decoder-training.png" alt="image-20210630094722699" style="zoom: 67%;" />
+<img src="images/seq-2-seq-decoder-training.png" alt="image-20210630094722699" style="zoom: 67%;" />
 
 Během inference gold sekvenci nemáme, takže buňce feedujeme výstup předchozí buňky. Tomu se říká **autoregressive decoding**.
 
-<img src="/Users/eugen/Documents/deep-learning-notes/images/seq-2-seq-inference.png" alt="image-20210630094832956" style="zoom:67%;" />
+<img src="images/seq-2-seq-inference.png" alt="image-20210630094832956" style="zoom:67%;" />
 
 Konkrétně na výstupu děláme FC embedding, a pošleme ho do softmaxu (přímo výstup) a do argmaxu (vstup následující buňky).
 
@@ -45,13 +45,13 @@ $$
 $$
 Značení je z tohoto obrázku.
 
-<img src="/Users/eugen/Documents/deep-learning-notes/images/seq-2-seq-attn.png" alt="image-20210630231352968" style="zoom:50%;" />
+<img src="images/seq-2-seq-attn.png" alt="image-20210630231352968" style="zoom:50%;" />
 
 > Explain how can word embeddings tying be used in a sequence-to-sequence architecture. [5]
 
 Na embedding vstupních slov a na embedding výsledných embeddingů zpět do slov se používají stejné matice (jen ta druhá je transponovaná).
 
-<img src="/Users/eugen/Documents/deep-learning-notes/images/tying-word-embeddings.png" alt="image-20210630225502869" style="zoom: 67%;" />
+<img src="images/tying-word-embeddings.png" alt="image-20210630225502869" style="zoom: 67%;" />
 
 > Write down why are subword units used in text processing, and describe the BPE algorithm for constructing a subword dictionary from a large corpus. [5]
 

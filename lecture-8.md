@@ -69,8 +69,8 @@ Během inference si už nemusíme pamatovat předpočítané hodnoty $\mu$ a $\s
 
 Nejblíže je tento slide, i když na konci by měla být ještě jedna vrstva.
 
-![img](/Users/eugen/Documents/deep-learning-notes/images/cle_rnn_gru.png)
+![img](images/cle_rnn_gru.png)
 
 S dvěma vrstvami na konci s reziduálními spojenímy by to mohlo vypadat nějak takto.
 
-<img src="/Users/eugen/Documents/deep-learning-notes/images/rnn-final.jpeg" alt="IMG_BC6F51DBC48F-1" style="zoom: 33%;" />
+<img src="images/rnn-final.jpeg" alt="IMG_BC6F51DBC48F-1" style="zoom: 33%;" />
