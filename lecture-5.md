@@ -42,16 +42,16 @@ S tím, že horní i spodní konvoluce můžeme sloučit do jedné.
 
 > Describe the CNN regularization method of networks with stochastic depth. [5]
 
-Náhodně s pravděpodobností $1 - p-i$ dropneme celý $i$-tý blok (kromě jeho residualního spojení, ofc). Během inference výstup bloku $B_i$ vynásobíme $p_i$. 
+Náhodně s pravděpodobností $1 - p_i$ dropneme celý $i$-tý blok (kromě jeho residualního spojení, ofc). Během inference výstup bloku $B_i$ vynásobíme $p_i$. 
 
-Pravděpodobnost toho, že blok zůstane, $p_i$, nastavíme tak, aby klesala lineárně ke konci sítě (první vrstvy jsou důležitější, nechceme je dropovat tak často). 
+Pravděpodobnost toho, že blok zůstane, tj. $p_i$, nastavíme tak, aby klesala lineárně ke konci sítě (první vrstvy jsou důležitější, nechceme je dropovat tak často). 
 $$
 p_i = 1 - \frac{i}{L} (1 - p_L)
 $$
 
 > Compare Cutout and DropBlock. [5]
 
-Cutout nahradí náhodný souvislý čtvercový kus obrázku průměrnou hodnotou, ve všech kanálech. DropBlock dropuje obdélníkové oblasti nezávisle v každém kanálu.
+Cutout nahradí náhodný souvislý čtvercový kus obrázku ve všech kanálech průměrnou hodnotou. DropBlock dropuje obdélníkové oblasti nezávisle v každém kanálu.
 
 Takže rozdíl je jednak v přístupu ke kanálům, a také v tom, že cutout hodnoty nahrazuje fake hodnotou, zatímco DropBlock je prostě zahodí. Cutout se (tím pádem?) používá jen na vstupních obrázcích, zatímco DropBlock kdykoli uvnitř sítě.
 
@@ -59,11 +59,16 @@ Obojí je lepší než běžný dropout, protože v obrázcích je lepší zahaz
 
 > Describe Squeeze and Excitation applied to a ResNet block. [5]
 
-SE chce obecně dovolit kanálům nějakým způsobem globálně interagovat; kovoluce umožňují jen lokální interakci. Squeeze spočítá průměr každého kanálu (global pooling), excitation přiřkne každému kanálu váhu 0–1, kterou daný kanál vynásobíme (sigmoid).
+SE chce obecně dovolit kanálům nějakým způsobem globálně interagovat, a z těchto interakcí vykoukal, jak je který kanál důležitý a podle toho je naškálovat.
 
-Mezi S a E vrstvami jsou FC vrstvy, které se právě starají o ty globální interakce. Místo jedné CxC FC vrstvy máme dvě, první redukující na C/r a druhou naopak nafukující zpět na C. Oproti běžnému CxC tímto ušetříme parametry. Podobná myšlenka jako u ResNet bottleneck bloků.
+- Squeeze spočítá průměr každého kanálu (global pooling)
+- Dvě složené FC vrstvy se postarají o transformaci $C \to C$, tj 
+- Excitation přiřkne každému kanálu váhu 0–1
+- Scale každý kanál v původním výsledku vynásobí vahou z excitation
 
-![image-20210628115555438](/Users/eugen/Documents/deep-learning-notes/images/squeeze-and-excitation.png)
+Místo jedné CxC FC vrstvy máme dvě, první redukující na C/r a druhou naopak nafukující zpět na C. Oproti běžnému $C\to C$ tímto ušetříme parametry. (Podobná myšlenka jako u ResNet bottleneck bloků)
+
+<img src="/Users/eugen/Documents/deep-learning-notes/images/squeeze-and-excitation.png" alt="image-20210628115555438" style="zoom:50%;" />
 
 > Draw the Mobile inverted bottleneck block (including explanation of separable convolutions, the expansion factor, exact positions of BatchNorms and ReLUs, but without describing Squeeze and excitation bocks). [5]
 

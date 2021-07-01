@@ -44,7 +44,6 @@ $$
 \end{array}\right.
 $$
 
-
 <img src="/Users/eugen/Library/Application Support/typora-user-images/image-20210629123616516.png" alt="image-20210629123616516" style="zoom: 33%;" />
 
 Celková loss ještě počítá s loss za klasifikaci, s tím, že loss za bbox se počítá jen pro "opravdové" třídy (tedy nesnažíme se bbox dávat kolem třídy "nic"),
@@ -58,11 +57,28 @@ Non-maximum supression se stará o to, aby se nám jeden objekt nezahlásil v n�
 
 > Considering a Faster-RCNN architecture, describe the region proposal network (its architecture, what are anchors, what does the loss look like). [5]
 
-Na obrázek položíme různé druhy *anchorů* (tři různé velikosti a tři různé poměry stran). Poté vyzkoušíme všechny 3x3 okénka a na každém z nich predikujeme třídu (je/není tam objekt) a případně bbox toho objektu vzhledem ke všem možným anchorům, které jsou soustředné se současným 3x3 okénkem.
+<img src="/Users/eugen/Documents/deep-learning-notes/images/faster_rcnn_architecture.jpg" alt="img" style="zoom: 25%;" />
 
-V průběhu trénování bereme anchor s největším překryvem + anchory s IoU > 70% jako pozitivní příklady (třída: objekt), achory s IoU < 30% jako negativní příklady (třída: nic), zbytek achorů ignorujeme.
+### RPN
 
-Během inference používám non-maximum supression, abych vyhodil duplikované RoI.
+1. Posouváme 3x3 window po získáne conv reprezentaci
+2. Pro každou pozici vygenerujeme *anchory*, většinou jich bývá devět (tři různé velikosti, tři různé poměry stran)
+3. Pro každý anchor predikujeme, jestli je v něm nějaký objekt (tj. jen binární cross-entropy loss nad sigmoidem), a pokud ano, tak kde leží jeho bbox.
+
+### Trénink
+
+1. Máme "opravdové" gold objekty i s umístěním
+2. Vygenerované anchory s největším překryvem s nějakým "opravdovým" objektem, a anchory s IoU > 70%, bereme jako pozitivní příklady (třída: objekt)
+3. Anchory s IoU < 30% bereme jako negativní příklady (třída: nic)
+4. Zbytek achorů ignorujeme
+
+Hlavy tedy trénujeme tak, aby správně předpovídaly třídu z (2) a (3), popř. ještě bbox těch "opravdových" objektů.
+
+### Inference
+
+1. RPN vyhodí nějaké anchory spolu s tím, jestli na nich něco je a popř. kde
+2. Za pomocí non-maximum supression vyhodíme anchory ukazující na stejný objekt
+3. Zbytek non-background anchorů použijeme jako RoI ve zbytku Fast-RCNN sítě
 
 > Considering Mask-RCNN architecture, describe the additions to a Faster-RCNN architecture (the RoI-Align layer, the new mask-producing head). [5]
 
