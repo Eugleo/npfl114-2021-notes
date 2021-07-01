@@ -37,7 +37,7 @@ Při inferenci k dropoutu nedochází, a protože máme najednou více neuronů 
 
 > Describe how label smoothing works for cross-entropy loss, both for sigmoid and softmax activations. [5]
 
-Někdy dochází k overfittingu, protože se MLE snaží dotáhnout poslední procentíčko v nějaké 99,99% predikci — taková predikce nám ale běžně stačí. Proto jako gold distribuci nebereme one-hot, ale $(1 - \alpha) \cdot \bold{1}_{gold} + \alpha \cdot 1/(\text{# classes})$.
+Někdy dochází k overfittingu, protože se MLE snaží dotáhnout poslední procentíčko v nějaké 99,99% predikci — taková predikce nám ale běžně stačí. Proto jako gold distribuci nebereme one-hot, ale $(1 - \alpha) \cdot \bold{1}_{gold} + \alpha \cdot 1/(\text{number of classes})$.
 
 ![IMG_D295C532AEB2-1](images/IMG_D295C532AEB2-1.jpeg)
 

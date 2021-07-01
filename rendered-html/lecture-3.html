@@ -56,7 +56,7 @@
 <blockquote>
 <p>Describe how label smoothing works for cross-entropy loss, both for sigmoid and softmax activations. [5]</p>
 </blockquote>
-<p>Někdy dochází k overfittingu, protože se MLE snaží dotáhnout poslední procentíčko v nějaké 99,99% predikci — taková predikce nám ale běžně stačí. Proto jako gold distribuci nebereme one-hot, ale <span class="math inline">\((1 - \alpha) \cdot \bold{1}_{gold} + \alpha \cdot 1/(\text{# classes})\)</span>.</p>
+<p>Někdy dochází k overfittingu, protože se MLE snaží dotáhnout poslední procentíčko v nějaké 99,99% predikci — taková predikce nám ale běžně stačí. Proto jako gold distribuci nebereme one-hot, ale <span class="math inline">\((1 - \alpha) \cdot \bold{1}_{gold} + \alpha \cdot 1/(\text{number of classes})\)</span>.</p>
 <figure>
 <img src="../images/IMG_D295C532AEB2-1.jpeg" alt="IMG_D295C532AEB2-1" /><figcaption aria-hidden="true">IMG_D295C532AEB2-1</figcaption>
 </figure>
