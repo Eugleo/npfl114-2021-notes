@@ -1,6 +1,6 @@
 # Exam quesiton answers for NPFL114 — Deep Learning
 
-View the generated files in the `rendered-*` directories.
+View the generated files in the `rendered-*` directories. To view the html files, clone the repository and open them in the browser.
 
 ## Contributing 
 
